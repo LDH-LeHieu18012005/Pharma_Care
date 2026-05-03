@@ -1,0 +1,12 @@
+<div class='container'>
+  <h1>Đăng ký</h1>
+  <% if (typeof error !== 'undefined' && error) { %><p><%= error %></p><% } %>
+  <form method='post' action='/register'>
+    <div><input type='text' name='full_name' placeholder='Họ tên'></div>
+    <div><input type='email' name='email' placeholder='Email'></div>
+    <div><input type='text' name='phone' placeholder='Số điện thoại'></div>
+    <div><input type='text' name='address' placeholder='Địa chỉ'></div>
+    <div><input type='password' name='password' placeholder='Mật khẩu'></div>
+    <button type='submit'>Đăng ký</button>
+  </form>
+</div>

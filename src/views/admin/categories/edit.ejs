@@ -1,0 +1,14 @@
+<div class='container'>
+  <h1>Sửa Loại thuốc</h1>
+  <form method='post' action='/admin/categories/edit/<%= item && item.id %>?_method=PUT'>
+    <div>
+      <label>Tên loại thuốc:</label>
+      <input type='text' name='name' value='<%= item && item.name ? item.name : "" %>' placeholder='Tên loại thuốc'>
+    </div>
+    <div>
+      <label>Mô tả:</label>
+      <textarea name='description' placeholder='Mô tả loại thuốc'><%= item && item.description ? item.description : "" %></textarea>
+    </div>
+    <button type='submit'>Lưu</button>
+  </form>
+</div>

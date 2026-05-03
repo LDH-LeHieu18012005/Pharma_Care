@@ -1,0 +1,38 @@
+<div class='container'>
+  <h1>Thêm thuốc</h1>
+  <form method='post' action='/admin/products/create' enctype='multipart/form-data'>
+    <div>
+      <label>Tên thuốc:</label>
+      <input type='text' name='name' value='<%= item && item.name ? item.name : "" %>' placeholder='Tên thuốc' required>
+    </div>
+    <div>
+      <label>Loại thuốc (Category ID):</label>
+      <input type='number' name='category_id' value='<%= item && item.category_id ? item.category_id : "" %>' placeholder='ID loại thuốc'>
+    </div>
+    <div>
+      <label>Nhà sản xuất (Brand ID):</label>
+      <input type='number' name='brand_id' value='<%= item && item.brand_id ? item.brand_id : "" %>' placeholder='ID nhà sản xuất'>
+    </div>
+    <div>
+      <label>Giá thuốc (VNĐ):</label>
+      <input type='number' name='price' value='<%= item && item.price ? item.price : "" %>' placeholder='Giá thuốc' required>
+    </div>
+    <div>
+      <label>Số lượng tồn kho:</label>
+      <input type='number' name='stock' value='<%= item && item.stock ? item.stock : "" %>' placeholder='Số lượng' required>
+    </div>
+    <div>
+      <label>Công dụng / Mô tả:</label>
+      <textarea name='description' placeholder='Công dụng, mô tả thuốc'><%= item && item.description ? item.description : "" %></textarea>
+    </div>
+    <div>
+      <label>Thành phần (Ingredients):</label>
+      <textarea name='ingredients' placeholder='Thành phần thuốc'><%= item && item.ingredients ? item.ingredients : "" %></textarea>
+    </div>
+    <div>
+      <label>Ảnh thuốc:</label>
+      <input type='file' name='thumbnail'>
+    </div>
+    <button type='submit'>Lưu</button>
+  </form>
+</div>
