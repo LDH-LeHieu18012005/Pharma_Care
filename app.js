@@ -2,8 +2,6 @@ const path = require('path');
 const express = require('express');
 const session = require('./src/config/session');
 const registerRoutes = require('./src/routes');
-const notFoundMiddleware = require('./src/middlewares/notFound.middleware');
-const errorMiddleware = require('./src/middlewares/error.middleware');
 
 const app = express();
 
@@ -22,7 +20,14 @@ app.use((req, res, next) => {
 app.use(express.static(path.join(__dirname, 'src/public')));
 
 registerRoutes(app);
-app.use(notFoundMiddleware);
-app.use(errorMiddleware);
+
+app.use((req, res) => {
+  res.status(404).render('errors/404', { title: '404' });
+});
+
+app.use((error, req, res, next) => {
+  console.error(error);
+  res.status(500).render('errors/500', { title: '500' });
+});
 
 module.exports = app;

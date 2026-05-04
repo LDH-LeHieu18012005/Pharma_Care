@@ -1,0 +1,5 @@
+<div class="card"><div class="card-body"><form method="POST" action="/admin/medicine-type/<%= item ? 'edit/'+item.id_type : 'create' %>">
+  <div class="mb-3"><label class="form-label">Tên loại thuốc *</label><input type="text" name="name_type" class="form-control" value="<%= item ? item.name_type : '' %>" required></div>
+  <div class="mb-3"><label class="form-label">Mô tả</label><textarea name="descriptions" class="form-control" rows="3"><%= item ? item.descriptions || '' : '' %></textarea></div>
+  <button class="btn btn-primary"><%= item ? 'Cập nhật' : 'Thêm mới' %></button> <a href="/admin/medicine-type" class="btn btn-secondary">Hủy</a>
+</form></div></div>

@@ -1,0 +1,4 @@
+<div class="d-flex justify-content-between mb-3"><h5>Loại thuốc</h5><a href="/admin/medicine-type/create" class="btn btn-primary btn-sm"><i class="bi bi-plus"></i> Thêm</a></div>
+<div class="card"><div class="card-body p-0"><table class="table table-hover mb-0"><thead><tr><th>#</th><th>Tên loại</th><th>Mô tả</th><th>Thao tác</th></tr></thead>
+<tbody><% (items||[]).forEach((t,i) => { %><tr><td><%= i+1 %></td><td><%= t.name_type %></td><td><%= t.descriptions || '' %></td>
+<td><a href="/admin/medicine-type/edit/<%= t.id_type %>" class="btn btn-warning btn-sm"><i class="bi bi-pencil"></i></a> <form method="POST" action="/admin/medicine-type/delete/<%= t.id_type %>" class="d-inline" onsubmit="return confirm('Xóa?')"><button class="btn btn-danger btn-sm"><i class="bi bi-trash"></i></button></form></td></tr><% }) %></tbody></table></div></div>

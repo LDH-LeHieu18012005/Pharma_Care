@@ -1,0 +1,9 @@
+<div class="card"><div class="card-body"><form method="POST" action="/admin/supplier/<%= item ? 'edit/'+item.id_supplier : 'create' %>">
+  <div class="row g-3">
+    <div class="col-md-6"><label class="form-label">Tên NCC *</label><input type="text" name="name_supplier" class="form-control" value="<%= item ? item.name_supplier : '' %>" required></div>
+    <div class="col-md-6"><label class="form-label">SĐT</label><input type="text" name="phone_supplier" class="form-control" value="<%= item ? item.phone_supplier || '' : '' %>"></div>
+    <div class="col-md-6"><label class="form-label">Email</label><input type="email" name="gmail_supplier" class="form-control" value="<%= item ? item.gmail_supplier || '' : '' %>"></div>
+    <div class="col-md-6"><label class="form-label">Địa chỉ</label><input type="text" name="address_supplier" class="form-control" value="<%= item ? item.address_supplier || '' : '' %>"></div>
+  </div>
+  <div class="mt-3"><button class="btn btn-primary"><%= item ? 'Cập nhật' : 'Thêm mới' %></button> <a href="/admin/supplier" class="btn btn-secondary">Hủy</a></div>
+</form></div></div>

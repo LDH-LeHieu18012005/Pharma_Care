@@ -1,0 +1,50 @@
+<div class="card"><div class="card-body">
+<form method="POST" action="/admin/sales/create" id="salesForm">
+  <div class="row mb-4"><div class="col-md-6"><label class="form-label">Chọn khách hàng</label><select name="id_customer" class="form-select"><option value="">-- Chọn khách hàng --</option><% (customers||[]).forEach(c => { %><option value="<%= c.id_customer %>"><%= c.name_customer %> - <%= c.phone_customer %></option><% }) %></select></div></div>
+  <h6 class="border-bottom pb-2 mb-3">Danh sách thuốc</h6>
+  <div id="items-container">
+    <div class="row g-2 mb-2 item-row">
+      <div class="col-md-6">
+        <select name="id_medicine" class="form-select" onchange="updatePrice(this)" required>
+          <option value="" data-price="0">-- Chọn thuốc --</option>
+          <% (medicines||[]).forEach(m => { %><option value="<%= m.id_medicine %>" data-price="<%= m.price %>"><%= m.name_medicine %> (Tồn: <%= m.quantity_total %> | Giá: <%= Number(m.price).toLocaleString() %>)</option><% }) %>
+        </select>
+      </div>
+      <div class="col-md-2"><input type="number" name="quantity_sales" class="form-control qty-input" value="1" min="1" onchange="calcTotal(this)" required placeholder="Số lượng"></div>
+      <div class="col-md-3"><div class="input-group"><input type="number" name="price" class="form-control price-input" value="0" readonly><span class="input-group-text">đ</span></div></div>
+      <div class="col-md-1"><button type="button" class="btn btn-danger btn-sm mt-1" onclick="this.closest('.item-row').remove(); updateGrandTotal();"><i class="bi bi-trash"></i></button></div>
+    </div>
+  </div>
+  <button type="button" class="btn btn-outline-primary btn-sm mb-4" onclick="addItemRow()"><i class="bi bi-plus"></i> Thêm thuốc khác</button>
+  <div class="d-flex justify-content-between align-items-center bg-light p-3 rounded mb-3">
+    <h5 class="mb-0">Tổng tiền:</h5><h4 class="mb-0 text-primary" id="grandTotal">0đ</h4>
+  </div>
+  <button class="btn btn-primary"><i class="bi bi-check-circle"></i> Hoàn tất thanh toán</button> <a href="/admin/sales" class="btn btn-secondary">Hủy</a>
+</form></div></div>
+
+<script>
+  function updatePrice(select) {
+    const row = select.closest('.item-row');
+    const price = select.options[select.selectedIndex].dataset.price || 0;
+    row.querySelector('.price-input').value = price;
+    updateGrandTotal();
+  }
+  function calcTotal() { updateGrandTotal(); }
+  function updateGrandTotal() {
+    let total = 0;
+    document.querySelectorAll('.item-row').forEach(row => {
+      const p = parseFloat(row.querySelector('.price-input').value) || 0;
+      const q = parseInt(row.querySelector('.qty-input').value) || 0;
+      total += p * q;
+    });
+    document.getElementById('grandTotal').innerText = total.toLocaleString('vi-VN') + 'đ';
+  }
+  function addItemRow() {
+    const container = document.getElementById('items-container');
+    const row = container.querySelector('.item-row').cloneNode(true);
+    row.querySelector('select').value = '';
+    row.querySelector('.qty-input').value = '1';
+    row.querySelector('.price-input').value = '0';
+    container.appendChild(row);
+  }
+</script>

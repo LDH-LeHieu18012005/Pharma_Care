@@ -1,16 +1,14 @@
-const ROLES = require('../constants/roles');
-
 function requireAdmin(req, res, next) {
-  if (req.session?.user?.role !== ROLES.ADMIN) {
-    return res.status(403).send('Forbidden');
+  if (req.session?.user?.permission !== 'admin') {
+    return res.status(403).render('errors/403', { title: 'Forbidden' });
   }
   return next();
 }
 
 function requireAdminOrStaff(req, res, next) {
-  const role = req.session?.user?.role;
-  if (role !== ROLES.ADMIN && role !== ROLES.STAFF) {
-    return res.status(403).send('Forbidden');
+  const p = req.session?.user?.permission;
+  if (p !== 'admin' && p !== 'staff') {
+    return res.status(403).render('errors/403', { title: 'Forbidden' });
   }
   return next();
 }

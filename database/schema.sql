@@ -1,211 +1,262 @@
--- Xóa database nếu tồn tại và tạo mới
-DROP DATABASE IF EXISTS pharmacy_shop;
-CREATE DATABASE pharmacy_shop CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
-USE pharmacy_shop;
+-- =============================================
+-- PHARMACY CARE - DATABASE SCHEMA
+-- Dựa theo ERD thiết kế của dự án
+-- =============================================
 
--- 1. Roles
-CREATE TABLE roles (
-    id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
-    name VARCHAR(50) NOT NULL UNIQUE,
-    description VARCHAR(255),
-    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-    updated_at DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+DROP DATABASE IF EXISTS pharmacy_care;
+CREATE DATABASE pharmacy_care CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+USE pharmacy_care;
+
+-- =============================================
+-- 1. NHÂN VIÊN (Staff)
+-- =============================================
+CREATE TABLE staff (
+    id_staff INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+    name_staff VARCHAR(100) NOT NULL,
+    age_staff INT,
+    gender_staff ENUM('Nam', 'Nu', 'Khac') DEFAULT 'Nam',
+    phone_staff VARCHAR(20),
+    address_staff VARCHAR(255),
+    gmail_staff VARCHAR(100) UNIQUE,
+    start_date DATE,
+    permission ENUM('admin', 'staff') DEFAULT 'staff',
+    username VARCHAR(50) NOT NULL UNIQUE,
+    password VARCHAR(255) NOT NULL,
+    status TINYINT(1) DEFAULT 1 COMMENT '1=active, 0=inactive',
+    time_create DATETIME DEFAULT CURRENT_TIMESTAMP,
+    time_update DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    images VARCHAR(255)
 );
 
--- 2. Users
-CREATE TABLE users (
-    id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
-    full_name VARCHAR(100) NOT NULL,
-    email VARCHAR(100) NOT NULL UNIQUE,
-    phone VARCHAR(20) UNIQUE,
-    password_hash VARCHAR(255) NOT NULL,
-    address VARCHAR(255),
-    role_id INT UNSIGNED NOT NULL,
-    status TINYINT(1) DEFAULT 1,
-    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-    updated_at DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-    FOREIGN KEY (role_id) REFERENCES roles(id)
+-- =============================================
+-- 2. CA LÀM VIỆC (Shifts)
+-- =============================================
+CREATE TABLE shifts (
+    id_shift INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+    start_time TIME NOT NULL,
+    description VARCHAR(255)
 );
 
--- 3. Categories
-CREATE TABLE categories (
-    id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
-    name VARCHAR(100) NOT NULL UNIQUE,
-    description TEXT,
-    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-    updated_at DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+-- =============================================
+-- 3. PHÂN CÔNG (Assignment)
+-- =============================================
+CREATE TABLE assignment (
+    id_assignment INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+    id_shift INT UNSIGNED NOT NULL,
+    id_staff INT UNSIGNED NOT NULL,
+    dates DATE NOT NULL,
+    time_create DATETIME DEFAULT CURRENT_TIMESTAMP,
+    time_update DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    FOREIGN KEY (id_shift) REFERENCES shifts(id_shift),
+    FOREIGN KEY (id_staff) REFERENCES staff(id_staff)
 );
 
--- 4. Brands
-CREATE TABLE brands (
-    id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
-    name VARCHAR(100) NOT NULL UNIQUE,
-    country VARCHAR(100),
-    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-    updated_at DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+-- =============================================
+-- 4. KHÁCH HÀNG (Customer)
+-- =============================================
+CREATE TABLE customer (
+    id_customer INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+    name_customer VARCHAR(100) NOT NULL,
+    age_customer INT,
+    gender_customer ENUM('Nam', 'Nu', 'Khac') DEFAULT 'Nam',
+    phone_customer VARCHAR(20),
+    address_customer VARCHAR(255),
+    time_create DATETIME DEFAULT CURRENT_TIMESTAMP,
+    time_update DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
 );
 
--- 5. Products
-CREATE TABLE products (
-    id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
-    name VARCHAR(255) NOT NULL,
-    category_id INT UNSIGNED NOT NULL,
-    brand_id INT UNSIGNED NOT NULL,
+-- =============================================
+-- 5. LOẠI THUỐC (Medicine type)
+-- =============================================
+CREATE TABLE medicine_type (
+    id_type INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+    name_type VARCHAR(100) NOT NULL UNIQUE,
+    descriptions TEXT,
+    time_create DATETIME DEFAULT CURRENT_TIMESTAMP,
+    time_update DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+);
+
+-- =============================================
+-- 6. KỆ THUỐC (Location rack)
+-- =============================================
+CREATE TABLE location_rack (
+    id_rack INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+    name_rack VARCHAR(100) NOT NULL,
+    status TINYINT(1) DEFAULT 1 COMMENT '1=active, 0=inactive',
+    time_create DATETIME DEFAULT CURRENT_TIMESTAMP,
+    time_update DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    descriptions TEXT
+);
+
+-- =============================================
+-- 7. LIÊN KẾT KỆ - LOẠI THUỐC (Rack Link Type)
+-- =============================================
+CREATE TABLE rack_link_type (
+    id_medicine_location INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+    id_type INT UNSIGNED NOT NULL,
+    id_rack INT UNSIGNED NOT NULL,
+    time_create DATETIME DEFAULT CURRENT_TIMESTAMP,
+    time_update DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    FOREIGN KEY (id_type) REFERENCES medicine_type(id_type),
+    FOREIGN KEY (id_rack) REFERENCES location_rack(id_rack)
+);
+
+-- =============================================
+-- 8. THUỐC (Medicine)
+-- =============================================
+CREATE TABLE medicine (
+    id_medicine INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+    name_medicine VARCHAR(255) NOT NULL,
+    quantity_total INT UNSIGNED DEFAULT 0,
     price DECIMAL(15,2) UNSIGNED NOT NULL,
-    stock INT UNSIGNED NOT NULL DEFAULT 0,
-    description TEXT,
-    ingredients TEXT,
-    thumbnail VARCHAR(255),
-    is_active TINYINT(1) DEFAULT 1,
-    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-    updated_at DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-    INDEX (name),
-    FOREIGN KEY (category_id) REFERENCES categories(id),
-    FOREIGN KEY (brand_id) REFERENCES brands(id)
+    medicine_status ENUM('con_hang', 'het_hang', 'ngung_kinh_doanh') DEFAULT 'con_hang',
+    id_type INT UNSIGNED NOT NULL,
+    id_rack INT UNSIGNED,
+    manufacturing_date DATE,
+    expiry_date DATE,
+    descriptions TEXT,
+    time_create DATETIME DEFAULT CURRENT_TIMESTAMP,
+    time_update DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    images VARCHAR(255),
+    FOREIGN KEY (id_type) REFERENCES medicine_type(id_type),
+    FOREIGN KEY (id_rack) REFERENCES location_rack(id_rack)
 );
 
--- 6. Carts
-CREATE TABLE carts (
-    id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
-    user_id INT UNSIGNED NOT NULL UNIQUE,
-    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-    updated_at DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-    FOREIGN KEY (user_id) REFERENCES users(id)
+-- =============================================
+-- 9. NHÀ CUNG CẤP (Supplier)
+-- =============================================
+CREATE TABLE supplier (
+    id_supplier INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+    name_supplier VARCHAR(255) NOT NULL,
+    phone_supplier VARCHAR(20),
+    gmail_supplier VARCHAR(100),
+    address_supplier VARCHAR(255),
+    status TINYINT(1) DEFAULT 1 COMMENT '1=active, 0=inactive',
+    time_create DATETIME DEFAULT CURRENT_TIMESTAMP,
+    time_update DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
 );
 
--- 7. Cart Items
-CREATE TABLE cart_items (
-    id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
-    cart_id INT UNSIGNED NOT NULL,
-    product_id INT UNSIGNED NOT NULL,
-    quantity INT UNSIGNED NOT NULL DEFAULT 1,
-    unit_price DECIMAL(15,2) UNSIGNED NOT NULL,
-    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-    updated_at DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-    FOREIGN KEY (cart_id) REFERENCES carts(id),
-    FOREIGN KEY (product_id) REFERENCES products(id)
+-- =============================================
+-- 10. LÔ HÀNG (Batchs)
+-- =============================================
+CREATE TABLE batchs (
+    id_batch INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+    id_medicine INT UNSIGNED NOT NULL,
+    quantity_in_batch INT UNSIGNED NOT NULL DEFAULT 0,
+    entry_price DECIMAL(15,2) UNSIGNED NOT NULL,
+    manufacturing_date DATE,
+    expiry_date DATE,
+    status ENUM('con_hang', 'het_hang', 'het_han') DEFAULT 'con_hang',
+    quantity_shortage INT UNSIGNED DEFAULT 0,
+    reason TEXT,
+    FOREIGN KEY (id_medicine) REFERENCES medicine(id_medicine)
 );
 
--- 8. Orders
-CREATE TABLE orders (
-    id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
-    user_id INT UNSIGNED NOT NULL,
-    order_code VARCHAR(50) NOT NULL UNIQUE,
-    receiver_name VARCHAR(100) NOT NULL,
-    receiver_phone VARCHAR(20) NOT NULL,
-    shipping_address VARCHAR(255) NOT NULL,
-    total_amount DECIMAL(15,2) UNSIGNED NOT NULL,
-    payment_method ENUM('COD', 'BANK_TRANSFER', 'VNPAY', 'MOMO') NOT NULL DEFAULT 'COD',
-    payment_status ENUM('UNPAID', 'PAID', 'REFUNDED') NOT NULL DEFAULT 'UNPAID',
-    order_status ENUM('PENDING', 'CONFIRMED', 'SHIPPING', 'DELIVERED', 'CANCELLED') NOT NULL DEFAULT 'PENDING',
-    note TEXT,
-    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-    updated_at DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-    FOREIGN KEY (user_id) REFERENCES users(id)
+-- =============================================
+-- 11. HÓA ĐƠN NHẬP (Purchase invoice)
+-- =============================================
+CREATE TABLE purchase_invoice (
+    id_purchase INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+    date_create DATETIME DEFAULT CURRENT_TIMESTAMP,
+    id_supplier INT UNSIGNED NOT NULL,
+    FOREIGN KEY (id_supplier) REFERENCES supplier(id_supplier)
 );
 
--- 9. Order Items
-CREATE TABLE order_items (
-    id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
-    order_id INT UNSIGNED NOT NULL,
-    product_id INT UNSIGNED NOT NULL,
-    quantity INT UNSIGNED NOT NULL,
-    unit_price DECIMAL(15,2) UNSIGNED NOT NULL,
-    subtotal DECIMAL(15,2) UNSIGNED NOT NULL,
-    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-    updated_at DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-    FOREIGN KEY (order_id) REFERENCES orders(id),
-    FOREIGN KEY (product_id) REFERENCES products(id)
+-- =============================================
+-- 12. CHI TIẾT NHẬP (Purchase details)
+-- =============================================
+CREATE TABLE purchase_details (
+    id_purchase INT UNSIGNED NOT NULL,
+    id_batch INT UNSIGNED NOT NULL,
+    PRIMARY KEY (id_purchase, id_batch),
+    FOREIGN KEY (id_purchase) REFERENCES purchase_invoice(id_purchase),
+    FOREIGN KEY (id_batch) REFERENCES batchs(id_batch)
 );
 
--- 10. Invoices
-CREATE TABLE invoices (
-    id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
-    order_id INT UNSIGNED NOT NULL UNIQUE,
-    invoice_code VARCHAR(50) NOT NULL UNIQUE,
-    created_by INT UNSIGNED NOT NULL,
-    issue_date DATETIME NOT NULL,
-    notes TEXT,
-    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-    updated_at DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-    FOREIGN KEY (order_id) REFERENCES orders(id),
-    FOREIGN KEY (created_by) REFERENCES users(id)
+-- =============================================
+-- 13. HÓA ĐƠN BÁN (Sales invoice)
+-- =============================================
+CREATE TABLE sales_invoice (
+    id_sales INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+    date_create DATETIME DEFAULT CURRENT_TIMESTAMP,
+    id_staff INT UNSIGNED NOT NULL,
+    id_customer INT UNSIGNED NOT NULL,
+    status ENUM('cho_xu_ly', 'da_thanh_toan', 'da_huy') DEFAULT 'cho_xu_ly',
+    FOREIGN KEY (id_staff) REFERENCES staff(id_staff),
+    FOREIGN KEY (id_customer) REFERENCES customer(id_customer)
 );
 
--- 11. Import Receipts
-CREATE TABLE import_receipts (
-    id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
-    receipt_code VARCHAR(50) NOT NULL UNIQUE,
-    supplier_name VARCHAR(255) NOT NULL,
-    created_by INT UNSIGNED NOT NULL,
-    total_amount DECIMAL(15,2) UNSIGNED NOT NULL,
-    notes TEXT,
-    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-    updated_at DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-    FOREIGN KEY (created_by) REFERENCES users(id)
+-- =============================================
+-- 14. CHI TIẾT BÁN (Sales details)
+-- =============================================
+CREATE TABLE sales_details (
+    id_sales INT UNSIGNED NOT NULL,
+    id_medicine INT UNSIGNED NOT NULL,
+    quantity_sales INT UNSIGNED NOT NULL,
+    price DECIMAL(15,2) UNSIGNED NOT NULL,
+    PRIMARY KEY (id_sales, id_medicine),
+    FOREIGN KEY (id_sales) REFERENCES sales_invoice(id_sales),
+    FOREIGN KEY (id_medicine) REFERENCES medicine(id_medicine)
 );
 
--- 12. Import Receipt Items
-CREATE TABLE import_receipt_items (
-    id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
-    import_receipt_id INT UNSIGNED NOT NULL,
-    product_id INT UNSIGNED NOT NULL,
-    quantity INT UNSIGNED NOT NULL,
-    import_price DECIMAL(15,2) UNSIGNED NOT NULL,
-    subtotal DECIMAL(15,2) UNSIGNED NOT NULL,
-    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-    updated_at DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-    FOREIGN KEY (import_receipt_id) REFERENCES import_receipts(id),
-    FOREIGN KEY (product_id) REFERENCES products(id)
-);
+-- =============================================
+-- DỮ LIỆU MẪU BAN ĐẦU
+-- =============================================
 
--- 13. Promotions
-CREATE TABLE promotions (
-    id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
-    title VARCHAR(255) NOT NULL,
-    description TEXT,
-    discount_percent DECIMAL(5,2) UNSIGNED NOT NULL,
-    start_date DATETIME NOT NULL,
-    end_date DATETIME NOT NULL,
-    status TINYINT(1) DEFAULT 1,
-    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-    updated_at DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
-);
+-- Tài khoản admin mặc định (password: admin123 - đã hash bằng bcrypt)
+INSERT INTO staff (name_staff, age_staff, gender_staff, phone_staff, address_staff, gmail_staff, start_date, permission, username, password, status)
+VALUES ('Admin', 30, 'Nam', '0901234567', 'TP.HCM', 'admin@pharmacare.com', CURDATE(), 'admin', 'admin', '$2a$10$X7UrE3GnM5XITIM5jZbCleJjQLdq3ql/TnVfGJ6fEHZJQl3WsZ/qK', 1);
 
--- 14. Product Promotions
-CREATE TABLE product_promotions (
-    id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
-    product_id INT UNSIGNED NOT NULL,
-    promotion_id INT UNSIGNED NOT NULL,
-    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-    FOREIGN KEY (product_id) REFERENCES products(id),
-    FOREIGN KEY (promotion_id) REFERENCES promotions(id)
-);
+-- Tài khoản nhân viên mẫu (password: staff123)
+INSERT INTO staff (name_staff, age_staff, gender_staff, phone_staff, address_staff, gmail_staff, start_date, permission, username, password, status)
+VALUES ('Nguyen Van A', 25, 'Nam', '0912345678', 'Ha Noi', 'nva@pharmacare.com', CURDATE(), 'staff', 'staff01', '$2a$10$X7UrE3GnM5XITIM5jZbCleJjQLdq3ql/TnVfGJ6fEHZJQl3WsZ/qK', 1);
 
--- 15. Product Images
-CREATE TABLE product_images (
-    id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
-    product_id INT UNSIGNED NOT NULL,
-    image_url VARCHAR(255) NOT NULL,
-    is_primary TINYINT(1) DEFAULT 0,
-    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-    updated_at DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-    FOREIGN KEY (product_id) REFERENCES products(id)
-);
+-- Ca làm việc mẫu
+INSERT INTO shifts (start_time, description) VALUES
+('07:00:00', 'Ca sáng (07:00 - 14:00)'),
+('14:00:00', 'Ca chiều (14:00 - 21:00)'),
+('21:00:00', 'Ca tối (21:00 - 07:00)');
 
--- 16. Contacts
-CREATE TABLE contacts (
-    id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
-    name VARCHAR(100) NOT NULL,
-    email VARCHAR(100) NOT NULL,
-    phone VARCHAR(20),
-    subject VARCHAR(255),
-    message TEXT NOT NULL,
-    created_at DATETIME DEFAULT CURRENT_TIMESTAMP
-);
+-- Loại thuốc mẫu
+INSERT INTO medicine_type (name_type, descriptions) VALUES
+('Thuốc giảm đau', 'Nhóm thuốc giảm đau, hạ sốt'),
+('Thuốc kháng sinh', 'Nhóm thuốc kháng sinh'),
+('Thuốc ho', 'Nhóm thuốc trị ho, cảm cúm'),
+('Vitamin & Khoáng chất', 'Nhóm vitamin và khoáng chất bổ sung'),
+('Thuốc tiêu hóa', 'Nhóm thuốc hỗ trợ tiêu hóa'),
+('Thuốc da liễu', 'Nhóm thuốc trị bệnh ngoài da');
 
--- Dữ liệu mẫu ban đầu cho Roles
-INSERT INTO roles (name, description) VALUES 
-('admin', 'Administrator'),
-('staff', 'Staff Member'),
-('customer', 'Customer');
+-- Kệ thuốc mẫu
+INSERT INTO location_rack (name_rack, status, descriptions) VALUES
+('Kệ A1', 1, 'Kệ thuốc giảm đau - tầng 1'),
+('Kệ A2', 1, 'Kệ thuốc kháng sinh - tầng 1'),
+('Kệ B1', 1, 'Kệ thuốc ho - tầng 2'),
+('Kệ B2', 1, 'Kệ vitamin - tầng 2'),
+('Kệ C1', 1, 'Kệ thuốc tiêu hóa - tầng 3');
+
+-- Liên kết kệ - loại thuốc
+INSERT INTO rack_link_type (id_type, id_rack) VALUES
+(1, 1), (2, 2), (3, 3), (4, 4), (5, 5);
+
+-- Nhà cung cấp mẫu
+INSERT INTO supplier (name_supplier, phone_supplier, gmail_supplier, address_supplier) VALUES
+('Công ty Dược phẩm Hậu Giang', '0291 3891 433', 'info@dhg.com.vn', 'Cần Thơ'),
+('Công ty Dược phẩm Traphaco', '024 3853 0764', 'info@traphaco.com.vn', 'Hà Nội'),
+('Công ty Dược phẩm Imexpharm', '0277 3822 100', 'info@imexpharm.com', 'Đồng Tháp');
+
+-- Thuốc mẫu
+INSERT INTO medicine (name_medicine, quantity_total, price, medicine_status, id_type, id_rack, manufacturing_date, expiry_date, descriptions) VALUES
+('Paracetamol 500mg', 200, 5000, 'con_hang', 1, 1, '2025-01-01', '2027-01-01', 'Thuốc giảm đau, hạ sốt'),
+('Amoxicillin 500mg', 150, 8000, 'con_hang', 2, 2, '2025-02-01', '2027-02-01', 'Kháng sinh nhóm penicillin'),
+('Dextromethorphan 15mg', 100, 12000, 'con_hang', 3, 3, '2025-03-01', '2027-03-01', 'Thuốc trị ho'),
+('Vitamin C 1000mg', 300, 15000, 'con_hang', 4, 4, '2025-01-15', '2027-01-15', 'Vitamin C liều cao'),
+('Omeprazol 20mg', 180, 10000, 'con_hang', 5, 5, '2025-04-01', '2027-04-01', 'Thuốc trị trào ngược dạ dày'),
+('Cetirizine 10mg', 120, 7000, 'con_hang', 1, 1, '2025-05-01', '2027-05-01', 'Thuốc chống dị ứng'),
+('Ibuprofen 400mg', 250, 6000, 'con_hang', 1, 1, '2025-03-15', '2027-03-15', 'Thuốc giảm đau, kháng viêm'),
+('Azithromycin 250mg', 80, 25000, 'con_hang', 2, 2, '2025-06-01', '2027-06-01', 'Kháng sinh nhóm macrolid');
+
+-- Khách hàng mẫu
+INSERT INTO customer (name_customer, age_customer, gender_customer, phone_customer, address_customer) VALUES
+('Tran Thi B', 35, 'Nu', '0987654321', 'TP.HCM'),
+('Le Van C', 45, 'Nam', '0976543210', 'Ha Noi'),
+('Pham Thi D', 28, 'Nu', '0965432109', 'Da Nang');

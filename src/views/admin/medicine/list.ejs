@@ -1,0 +1,26 @@
+<div class="d-flex justify-content-between mb-3">
+  <h5>Danh sách thuốc</h5>
+  <a href="/admin/medicine/create" class="btn btn-primary btn-sm"><i class="bi bi-plus"></i> Thêm mới</a>
+</div>
+<div class="card"><div class="card-body p-0">
+<table class="table table-hover mb-0">
+  <thead><tr><th>#</th><th>Tên thuốc</th><th>Loại</th><th>Kệ</th><th>Giá</th><th>Tồn kho</th><th>Trạng thái</th><th>Thao tác</th></tr></thead>
+  <tbody>
+  <% (items||[]).forEach((m, i) => { %>
+    <tr>
+      <td><%= i+1 %></td>
+      <td><strong><%= m.name_medicine %></strong></td>
+      <td><%= m.name_type || '' %></td>
+      <td><%= m.name_rack || '' %></td>
+      <td><%= Number(m.price).toLocaleString('vi-VN') %>đ</td>
+      <td><span class="badge bg-<%= m.quantity_total <= 10 ? 'danger' : 'success' %>"><%= m.quantity_total %></span></td>
+      <td><span class="badge bg-<%= m.medicine_status === 'con_hang' ? 'success' : 'secondary' %>"><%= m.medicine_status %></span></td>
+      <td>
+        <a href="/admin/medicine/edit/<%= m.id_medicine %>" class="btn btn-warning btn-sm"><i class="bi bi-pencil"></i></a>
+        <form method="POST" action="/admin/medicine/delete/<%= m.id_medicine %>" class="d-inline" onsubmit="return confirm('Xóa?')"><button class="btn btn-danger btn-sm"><i class="bi bi-trash"></i></button></form>
+      </td>
+    </tr>
+  <% }) %>
+  </tbody>
+</table>
+</div></div>

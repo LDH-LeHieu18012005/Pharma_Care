@@ -1,0 +1,6 @@
+<div class="d-flex justify-content-between mb-3"><h5>Hóa đơn bán hàng</h5><a href="/admin/sales/create" class="btn btn-primary btn-sm"><i class="bi bi-cart-plus"></i> Tạo hóa đơn</a></div>
+<div class="card"><div class="card-body p-0"><table class="table table-hover mb-0"><thead><tr><th>Mã HĐ</th><th>Ngày bán</th><th>Khách hàng</th><th>Nhân viên</th><th>Trạng thái</th><th>Thao tác</th></tr></thead>
+<tbody><% (items||[]).forEach((s) => { %><tr><td><strong>HD-<%= s.id_sales %></strong></td><td><%= new Date(s.date_create).toLocaleString('vi-VN') %></td>
+<td><%= s.name_customer || 'Khách lẻ' %></td><td><%= s.name_staff %></td>
+<td><span class="badge bg-<%= s.status=='da_thanh_toan'?'success':(s.status=='cho_xu_ly'?'warning':'danger') %>"><%= s.status %></span></td>
+<td><a href="/admin/sales/<%= s.id_sales %>" class="btn btn-info btn-sm text-white"><i class="bi bi-eye"></i></a> <form method="POST" action="/admin/sales/delete/<%= s.id_sales %>" class="d-inline" onsubmit="return confirm('Hủy hóa đơn?')"><button class="btn btn-danger btn-sm"><i class="bi bi-x-circle"></i></button></form></td></tr><% }) %></tbody></table></div></div>

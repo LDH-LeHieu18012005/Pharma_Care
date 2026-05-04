@@ -1,0 +1,5 @@
+<div class="d-flex justify-content-between mb-3"><h5>Kệ thuốc</h5><a href="/admin/rack/create" class="btn btn-primary btn-sm"><i class="bi bi-plus"></i> Thêm</a></div>
+<div class="card"><div class="card-body p-0"><table class="table table-hover mb-0"><thead><tr><th>#</th><th>Tên kệ</th><th>Mô tả</th><th>Trạng thái</th><th>Thao tác</th></tr></thead>
+<tbody><% (items||[]).forEach((r,i) => { %><tr><td><%= i+1 %></td><td><%= r.name_rack %></td><td><%= r.descriptions || '' %></td>
+<td><span class="badge bg-<%= r.status==1?'success':'secondary' %>"><%= r.status==1?'Sử dụng':'Đã ẩn' %></span></td>
+<td><a href="/admin/rack/edit/<%= r.id_rack %>" class="btn btn-warning btn-sm"><i class="bi bi-pencil"></i></a> <form method="POST" action="/admin/rack/delete/<%= r.id_rack %>" class="d-inline" onsubmit="return confirm('Xóa?')"><button class="btn btn-danger btn-sm"><i class="bi bi-trash"></i></button></form></td></tr><% }) %></tbody></table></div></div>

@@ -1,12 +1,45 @@
-<div class='container'>
-            <h1>Dashboard admin</h1>
-            <% const data = items || summary || item || {}; %>
-            <table border='1' cellpadding='8' cellspacing='0'>
-                <tbody>
-                <% Object.keys(data).forEach(function(key) { %>
-                    <tr><th><%= key %></th><td><%= data[key] %></td></tr>
-                <% }) %>
-                </tbody>
-            </table>
-            </div>
-            
+<div class="row g-4 mb-4">
+  <div class="col-md-3">
+    <div class="card card-stat"><div class="card-body d-flex align-items-center gap-3">
+      <div class="stat-icon bg-primary bg-opacity-10 text-primary"><i class="bi bi-capsule"></i></div>
+      <div><div class="text-muted small">Thuốc</div><div class="fs-4 fw-bold"><%= summary.totalMedicine %></div></div>
+    </div></div>
+  </div>
+  <div class="col-md-3">
+    <div class="card card-stat"><div class="card-body d-flex align-items-center gap-3">
+      <div class="stat-icon bg-success bg-opacity-10 text-success"><i class="bi bi-people"></i></div>
+      <div><div class="text-muted small">Khách hàng</div><div class="fs-4 fw-bold"><%= summary.totalCustomer %></div></div>
+    </div></div>
+  </div>
+  <div class="col-md-3">
+    <div class="card card-stat"><div class="card-body d-flex align-items-center gap-3">
+      <div class="stat-icon bg-warning bg-opacity-10 text-warning"><i class="bi bi-receipt"></i></div>
+      <div><div class="text-muted small">Hóa đơn</div><div class="fs-4 fw-bold"><%= summary.totalSales %></div></div>
+    </div></div>
+  </div>
+  <div class="col-md-3">
+    <div class="card card-stat"><div class="card-body d-flex align-items-center gap-3">
+      <div class="stat-icon bg-info bg-opacity-10 text-info"><i class="bi bi-currency-dollar"></i></div>
+      <div><div class="text-muted small">Doanh thu</div><div class="fs-4 fw-bold"><%= Number(summary.totalRevenue).toLocaleString('vi-VN') %>đ</div></div>
+    </div></div>
+  </div>
+</div>
+
+<div class="row g-4">
+  <div class="col-md-6">
+    <div class="card"><div class="card-header fw-semibold"><i class="bi bi-exclamation-triangle text-warning"></i> Thuốc sắp hết tồn</div>
+      <div class="card-body p-0"><table class="table table-sm mb-0">
+        <thead><tr><th>Tên thuốc</th><th>Tồn kho</th></tr></thead>
+        <tbody><% (lowStock || []).forEach(m => { %><tr><td><%= m.name_medicine %></td><td><span class="badge bg-<%= m.quantity_total <= 10 ? 'danger' : 'warning' %>"><%= m.quantity_total %></span></td></tr><% }) %></tbody>
+      </table></div>
+    </div>
+  </div>
+  <div class="col-md-6">
+    <div class="card"><div class="card-header fw-semibold"><i class="bi bi-clock text-danger"></i> Lô hàng sắp hết hạn</div>
+      <div class="card-body p-0"><table class="table table-sm mb-0">
+        <thead><tr><th>Thuốc</th><th>Hạn dùng</th></tr></thead>
+        <tbody><% (expiring || []).forEach(b => { %><tr><td><%= b.name_medicine %></td><td class="text-danger"><%= b.expiry_date ? new Date(b.expiry_date).toLocaleDateString('vi-VN') : '' %></td></tr><% }) %></tbody>
+      </table></div>
+    </div>
+  </div>
+</div>
