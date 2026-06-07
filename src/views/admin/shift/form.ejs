@@ -1,0 +1,18 @@
+<div class="card"><div class="card-body">
+<form method="POST" action="/admin/shift/<%= item ? 'edit/'+item.id_shift : 'create' %>">
+  <div class="row g-3">
+    <div class="col-md-4">
+      <label class="form-label">Giờ bắt đầu *</label>
+      <input type="time" name="start_time" class="form-control" value="<%= item ? item.start_time : '' %>" required>
+    </div>
+    <div class="col-md-8">
+      <label class="form-label">Tên ca / Mô tả</label>
+      <input type="text" name="description" class="form-control" value="<%= item ? item.description : '' %>" placeholder="VD: Ca Sáng (07:00 - 14:00)">
+    </div>
+  </div>
+  <div class="mt-3">
+    <button class="btn btn-primary"><%= item ? 'Cập nhật' : 'Thêm mới' %></button> 
+    <a href="/admin/shift" class="btn btn-secondary">Hủy</a>
+  </div>
+</form>
+</div></div>

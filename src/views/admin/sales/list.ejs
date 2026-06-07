@@ -1,6 +1,80 @@
-<div class="d-flex justify-content-between mb-3"><h5>Hóa đơn bán hàng</h5><a href="/admin/sales/create" class="btn btn-primary btn-sm"><i class="bi bi-cart-plus"></i> Tạo hóa đơn</a></div>
-<div class="card"><div class="card-body p-0"><table class="table table-hover mb-0"><thead><tr><th>Mã HĐ</th><th>Ngày bán</th><th>Khách hàng</th><th>Nhân viên</th><th>Trạng thái</th><th>Thao tác</th></tr></thead>
-<tbody><% (items||[]).forEach((s) => { %><tr><td><strong>HD-<%= s.id_sales %></strong></td><td><%= new Date(s.date_create).toLocaleString('vi-VN') %></td>
-<td><%= s.name_customer || 'Khách lẻ' %></td><td><%= s.name_staff %></td>
-<td><span class="badge bg-<%= s.status=='da_thanh_toan'?'success':(s.status=='cho_xu_ly'?'warning':'danger') %>"><%= s.status %></span></td>
-<td><a href="/admin/sales/<%= s.id_sales %>" class="btn btn-info btn-sm text-white"><i class="bi bi-eye"></i></a> <form method="POST" action="/admin/sales/delete/<%= s.id_sales %>" class="d-inline" onsubmit="return confirm('Hủy hóa đơn?')"><button class="btn btn-danger btn-sm"><i class="bi bi-x-circle"></i></button></form></td></tr><% }) %></tbody></table></div></div>
+<%- /* Sales List - Search + Filter + Pagination */ %>
+<div class="d-flex justify-content-between align-items-center mb-3 flex-wrap gap-2">
+  <h5 class="mb-0">Hóa đơn bán hàng <span class="badge bg-primary fs-6"><%= pagination.total %></span></h5>
+  <div class="d-flex gap-2">
+    <a href="/admin/export/sales/excel" class="btn btn-success btn-sm"><i class="bi bi-file-earmark-excel"></i> Xuất Excel</a>
+    <a href="/admin/export/sales/pdf" class="btn btn-danger btn-sm"><i class="bi bi-file-earmark-pdf"></i> Xuất PDF</a>
+    <a href="/admin/sales/create" class="btn btn-primary btn-sm"><i class="bi bi-cart-plus"></i> Tạo hóa đơn</a>
+  </div>
+</div>
+
+<%# Filter Form %>
+<div class="card mb-3">
+  <div class="card-body py-2">
+    <form method="GET" action="/admin/sales" class="row g-2 align-items-end">
+      <div class="col-md-3">
+        <label class="form-label small mb-1">Tìm kiếm</label>
+        <div class="input-group input-group-sm">
+          <span class="input-group-text"><i class="bi bi-search"></i></span>
+          <input type="text" name="keyword" class="form-control" placeholder="Mã HĐ / tên khách..." value="<%= filters.keyword %>">
+        </div>
+      </div>
+      <div class="col-md-2">
+        <label class="form-label small mb-1">Trạng thái</label>
+        <select name="status" class="form-select form-select-sm">
+          <option value="">-- Tất cả --</option>
+          <option value="cho_xu_ly" <%= filters.status === 'cho_xu_ly' ? 'selected' : '' %>>Chờ xử lý</option>
+          <option value="da_thanh_toan" <%= filters.status === 'da_thanh_toan' ? 'selected' : '' %>>Đã thanh toán</option>
+          <option value="da_huy" <%= filters.status === 'da_huy' ? 'selected' : '' %>>Đã hủy</option>
+        </select>
+      </div>
+      <div class="col-md-2">
+        <label class="form-label small mb-1">Từ ngày</label>
+        <input type="date" name="dateFrom" class="form-control form-control-sm" value="<%= filters.dateFrom %>">
+      </div>
+      <div class="col-md-2">
+        <label class="form-label small mb-1">Đến ngày</label>
+        <input type="date" name="dateTo" class="form-control form-control-sm" value="<%= filters.dateTo %>">
+      </div>
+      <div class="col-md-3 d-flex gap-2">
+        <button type="submit" class="btn btn-primary btn-sm flex-grow-1"><i class="bi bi-funnel"></i> Lọc</button>
+        <a href="/admin/sales" class="btn btn-outline-secondary btn-sm"><i class="bi bi-x"></i> Xóa lọc</a>
+      </div>
+    </form>
+  </div>
+</div>
+
+<div class="card">
+  <div class="card-body p-0">
+    <table class="table table-hover mb-0">
+      <thead>
+        <tr><th>Mã HĐ</th><th>Ngày bán</th><th>Khách hàng</th><th>Nhân viên</th><th>Trạng thái</th><th>Thao tác</th></tr>
+      </thead>
+      <tbody>
+      <% if ((items||[]).length === 0) { %>
+        <tr><td colspan="6" class="text-center text-muted py-4"><i class="bi bi-inbox fs-4 d-block mb-2"></i>Không có hóa đơn nào</td></tr>
+      <% } %>
+      <% (items||[]).forEach(s => { %>
+        <tr>
+          <td><strong>HD-<%= s.id_sales %></strong></td>
+          <td><%= new Date(s.date_create).toLocaleString('vi-VN') %></td>
+          <td><%= s.name_customer || 'Khách lẻ' %></td>
+          <td><%= s.name_staff %></td>
+          <td>
+            <% const sMap = { da_thanh_toan: ['success','Đã thanh toán'], cho_xu_ly: ['warning','Chờ xử lý'], da_huy: ['danger','Đã hủy'] }; %>
+            <span class="badge bg-<%= (sMap[s.status]||['secondary','?'])[0] %>"><%= (sMap[s.status]||['secondary',s.status])[1] %></span>
+          </td>
+          <td>
+            <a href="/admin/sales/<%= s.id_sales %>" class="btn btn-info btn-sm text-white"><i class="bi bi-eye"></i></a>
+            <a href="/admin/sales/print/<%= s.id_sales %>" target="_blank" class="btn btn-outline-secondary btn-sm" title="In hóa đơn"><i class="bi bi-printer"></i></a>
+            <form method="POST" action="/admin/sales/delete/<%= s.id_sales %>" class="d-inline" onsubmit="return confirm('Hủy hóa đơn này?')">
+              <button class="btn btn-danger btn-sm"><i class="bi bi-x-circle"></i></button>
+            </form>
+          </td>
+        </tr>
+      <% }) %>
+      </tbody>
+    </table>
+  </div>
+</div>
+<%- include('../_pagination', { currentPage: pagination.currentPage, totalPages: pagination.totalPages, total: pagination.total, query: query, baseUrl: '/admin/sales' }) %>

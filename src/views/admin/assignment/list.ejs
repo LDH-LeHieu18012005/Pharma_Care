@@ -1,0 +1,24 @@
+<div class="d-flex justify-content-between mb-3">
+  <h5>Phân công nhân viên</h5>
+  <a href="/admin/assignment/create" class="btn btn-primary btn-sm"><i class="bi bi-calendar-plus"></i> Phân công lịch</a>
+</div>
+<div class="card"><div class="card-body p-0">
+<table class="table table-hover mb-0">
+  <thead><tr><th>Ngày làm việc</th><th>Ca làm việc</th><th>Nhân viên</th><th>Thao tác</th></tr></thead>
+  <tbody>
+  <% (items||[]).forEach((a) => { %>
+    <tr>
+      <td><strong><%= new Date(a.dates).toLocaleDateString('vi-VN') %></strong></td>
+      <td><span class="badge bg-info text-dark"><%= a.description %></span></td>
+      <td><%= a.name_staff %></td>
+      <td>
+        <a href="/admin/assignment/edit/<%= a.id_assignment %>" class="btn btn-warning btn-sm"><i class="bi bi-pencil"></i></a>
+        <form method="POST" action="/admin/assignment/delete/<%= a.id_assignment %>" class="d-inline" onsubmit="return confirm('Xóa phân công này?')">
+          <button class="btn btn-danger btn-sm"><i class="bi bi-trash"></i></button>
+        </form>
+      </td>
+    </tr>
+  <% }) %>
+  </tbody>
+</table>
+</div></div>

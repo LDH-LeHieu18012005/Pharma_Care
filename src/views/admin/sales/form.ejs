@@ -1,36 +1,94 @@
-<div class="card"><div class="card-body">
-<form method="POST" action="/admin/sales/create" id="salesForm">
-  <div class="row mb-4"><div class="col-md-6"><label class="form-label">Chọn khách hàng</label><select name="id_customer" class="form-select"><option value="">-- Chọn khách hàng --</option><% (customers||[]).forEach(c => { %><option value="<%= c.id_customer %>"><%= c.name_customer %> - <%= c.phone_customer %></option><% }) %></select></div></div>
-  <h6 class="border-bottom pb-2 mb-3">Danh sách thuốc</h6>
-  <div id="items-container">
-    <div class="row g-2 mb-2 item-row">
-      <div class="col-md-6">
-        <select name="id_medicine" class="form-select" onchange="updatePrice(this)" required>
-          <option value="" data-price="0">-- Chọn thuốc --</option>
-          <% (medicines||[]).forEach(m => { %><option value="<%= m.id_medicine %>" data-price="<%= m.price %>"><%= m.name_medicine %> (Tồn: <%= m.quantity_total %> | Giá: <%= Number(m.price).toLocaleString() %>)</option><% }) %>
-        </select>
+<div class="card shadow-sm border-0 mb-4">
+  <div class="card-body">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+      <h5 class="mb-0 text-primary fw-bold"><i class="bi bi-cart-plus"></i> Thông tin đơn hàng</h5>
+      <button type="button" class="btn btn-warning fw-bold text-dark btn-sm shadow-sm" id="btnScanAI" onclick="scanInvoiceAI()">
+        <i class="bi bi-magic"></i> 🪄 Đọc đơn tự động bằng AI
+      </button>
+    </div>
+    <form method="POST" action="/admin/sales/create" id="salesForm" enctype="multipart/form-data">
+      <div class="row mb-4">
+        <div class="col-md-6">
+          <label class="form-label fw-semibold">Chọn khách hàng</label>
+          <select name="id_customer" id="customerSelect" class="form-select">
+            <option value="">-- Khách vãng lai --</option>
+            <% (customers||[]).forEach(c => { %>
+              <option value="<%= c.id_customer %>" data-phone="<%= c.phone_customer %>"><%= c.name_customer %> - <%= c.phone_customer || 'Không có SĐT' %></option>
+            <% }) %>
+          </select>
+        </div>
+        <div class="col-md-6">
+          <label class="form-label fw-semibold text-danger">Hình ảnh đơn thuốc (nếu có)</label>
+          <input type="file" name="prescription_image" id="invoiceImage" class="form-control" accept="image/*">
+          <small class="text-muted fst-italic">Tải ảnh lên và bấm <strong>Đọc tự động bằng AI</strong> để phần mềm tự điền thông tin.</small>
+        </div>
       </div>
-      <div class="col-md-2"><input type="number" name="quantity_sales" class="form-control qty-input" value="1" min="1" onchange="calcTotal(this)" required placeholder="Số lượng"></div>
-      <div class="col-md-3"><div class="input-group"><input type="number" name="price" class="form-control price-input" value="0" readonly><span class="input-group-text">đ</span></div></div>
-      <div class="col-md-1"><button type="button" class="btn btn-danger btn-sm mt-1" onclick="this.closest('.item-row').remove(); updateGrandTotal();"><i class="bi bi-trash"></i></button></div>
+      
+      <h6 class="border-bottom pb-2 mb-3 fw-bold"><i class="bi bi-capsule"></i> Danh sách thuốc</h6>
+      <div id="items-container">
+        <div class="row g-2 mb-2 item-row">
+          <div class="col-md-6">
+            <select name="id_medicine" class="form-select medicine-select" onchange="updatePrice(this)" required>
+              <option value="" data-price="0">-- Chọn thuốc --</option>
+              <% (medicines||[]).forEach(m => { %>
+                <option value="<%= m.id_medicine %>" data-price="<%= m.price %>" data-name="<%= m.name_medicine.toLowerCase() %>">
+                  <%= m.name_medicine %> (Tồn: <%= m.quantity_total %> | Giá: <%= Number(m.price).toLocaleString() %>)
+                </option>
+              <% }) %>
+            </select>
+          </div>
+          <div class="col-md-2">
+            <input type="number" name="quantity_sales" class="form-control qty-input" value="1" min="1" onchange="calcTotal()" required placeholder="SL">
+          </div>
+          <div class="col-md-3">
+            <div class="input-group">
+              <input type="number" name="price" class="form-control price-input" value="0" readonly>
+              <span class="input-group-text bg-light fw-bold text-primary">đ</span>
+            </div>
+          </div>
+          <div class="col-md-1">
+            <button type="button" class="btn btn-outline-danger btn-sm mt-1" onclick="removeRow(this)"><i class="bi bi-trash"></i></button>
+          </div>
+        </div>
+      </div>
+      
+      <button type="button" class="btn btn-outline-primary btn-sm fw-bold mb-4" onclick="addItemRow()"><i class="bi bi-plus-lg"></i> Thêm hàng</button>
+      
+      <div class="d-flex justify-content-between align-items-center bg-light p-3 rounded mb-3 border">
+        <h5 class="mb-0 text-muted">Tổng tiền thanh toán:</h5>
+        <h3 class="mb-0 text-danger fw-bold" id="grandTotal">0đ</h3>
+      </div>
+      
+      <div class="d-flex gap-2 justify-content-end">
+        <a href="/admin/sales" class="btn btn-secondary">Hủy bỏ</a>
+        <button type="submit" class="btn btn-primary fw-bold"><i class="bi bi-check2-circle"></i> Hoàn tất thanh toán</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- Modal Loading AI -->
+<div class="modal fade" id="aiLoadingModal" data-bs-backdrop="static" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content border-0 shadow text-center p-4">
+      <div class="modal-body">
+        <div class="spinner-border text-primary mb-3" role="status" style="width: 3rem; height: 3rem;"></div>
+        <h5 class="fw-bold text-primary">AI đang đọc ảnh...</h5>
+        <p class="text-muted small mb-0">Quá trình này có thể mất vài giây. Vui lòng không đóng cửa sổ.</p>
+      </div>
     </div>
   </div>
-  <button type="button" class="btn btn-outline-primary btn-sm mb-4" onclick="addItemRow()"><i class="bi bi-plus"></i> Thêm thuốc khác</button>
-  <div class="d-flex justify-content-between align-items-center bg-light p-3 rounded mb-3">
-    <h5 class="mb-0">Tổng tiền:</h5><h4 class="mb-0 text-primary" id="grandTotal">0đ</h4>
-  </div>
-  <button class="btn btn-primary"><i class="bi bi-check-circle"></i> Hoàn tất thanh toán</button> <a href="/admin/sales" class="btn btn-secondary">Hủy</a>
-</form></div></div>
+</div>
 
 <script>
   function updatePrice(select) {
     const row = select.closest('.item-row');
-    const price = select.options[select.selectedIndex].dataset.price || 0;
+    const price = select.options[select.selectedIndex]?.dataset.price || 0;
     row.querySelector('.price-input').value = price;
-    updateGrandTotal();
+    calcTotal();
   }
-  function calcTotal() { updateGrandTotal(); }
-  function updateGrandTotal() {
+  
+  function calcTotal() {
     let total = 0;
     document.querySelectorAll('.item-row').forEach(row => {
       const p = parseFloat(row.querySelector('.price-input').value) || 0;
@@ -39,12 +97,152 @@
     });
     document.getElementById('grandTotal').innerText = total.toLocaleString('vi-VN') + 'đ';
   }
+  
   function addItemRow() {
     const container = document.getElementById('items-container');
-    const row = container.querySelector('.item-row').cloneNode(true);
-    row.querySelector('select').value = '';
-    row.querySelector('.qty-input').value = '1';
-    row.querySelector('.price-input').value = '0';
-    container.appendChild(row);
+    const firstRow = container.querySelector('.item-row');
+    const newRow = firstRow.cloneNode(true);
+    newRow.querySelector('select').value = '';
+    newRow.querySelector('.qty-input').value = '1';
+    newRow.querySelector('.price-input').value = '0';
+    container.appendChild(newRow);
+    return newRow;
+  }
+
+  function removeRow(btn) {
+    const rows = document.querySelectorAll('.item-row');
+    if(rows.length > 1) {
+      btn.closest('.item-row').remove();
+      calcTotal();
+    } else {
+      alert('Phải có ít nhất 1 mặt hàng!');
+    }
+  }
+
+  // AI Scan Logic
+  async function scanInvoiceAI() {
+    const fileInput = document.getElementById('invoiceImage');
+    if (!fileInput.files || fileInput.files.length === 0) {
+      alert("Vui lòng chọn hoặc chụp một bức ảnh ở mục 'Hình ảnh đơn thuốc' trước khi scan bằng AI!");
+      return;
+    }
+
+    const file = fileInput.files[0];
+    const formData = new FormData();
+    formData.append('scan_image', file);
+
+    const loadingModal = new bootstrap.Modal(document.getElementById('aiLoadingModal'));
+    loadingModal.show();
+
+    try {
+      const response = await fetch('/admin/sales/scan', {
+        method: 'POST',
+        body: formData
+      });
+
+      const result = await response.json();
+      loadingModal.hide();
+
+      if (!response.ok || !result.success) {
+        alert("Lỗi khi scan AI: " + (result.error || "Không xác định"));
+        return;
+      }
+
+      const data = result.data || {};
+      
+      // Auto fill customer
+      if (data.id_customer) {
+        const custSelect = document.getElementById('customerSelect');
+        let optionExists = false;
+        
+        // Check if option already exists
+        for (let i = 0; i < custSelect.options.length; i++) {
+          if (custSelect.options[i].value == data.id_customer) {
+            custSelect.selectedIndex = i;
+            optionExists = true;
+            break;
+          }
+        }
+        
+        // If not exists (new customer created by backend), add it dynamically
+        if (!optionExists) {
+          const newOpt = document.createElement('option');
+          newOpt.value = data.id_customer;
+          newOpt.text = `${data.customer_name || 'Khách vãng lai'} - ${data.customer_phone || 'Không có SĐT'} (Mới tạo)`;
+          custSelect.appendChild(newOpt);
+          custSelect.value = data.id_customer;
+        }
+
+        if (data.is_new_customer) {
+          alert(`Hệ thống đã tự động TẠO MỚI khách hàng: ${data.customer_name || 'Khách vãng lai'} (${data.customer_phone})`);
+        }
+      }
+
+      // Auto fill medicines
+      if (data.medicines && data.medicines.length > 0) {
+        // Clear existing empty rows if any
+        const container = document.getElementById('items-container');
+        const rows = container.querySelectorAll('.item-row');
+        if (rows.length === 1 && !rows[0].querySelector('select').value) {
+          // Keep the first row, we will use it
+        } else {
+          // We will just append
+        }
+
+        let firstItemUsed = false;
+
+        data.medicines.forEach((med, index) => {
+          let rowToUse;
+          if (index === 0 && rows.length === 1 && !rows[0].querySelector('select').value) {
+            rowToUse = rows[0];
+            firstItemUsed = true;
+          } else {
+            rowToUse = addItemRow();
+          }
+
+          const select = rowToUse.querySelector('select');
+          const qtyInput = rowToUse.querySelector('.qty-input');
+          const aiName = med.name.toLowerCase();
+
+          // Try to find best match
+          let bestMatchIndex = 0;
+          let bestMatchScore = -1;
+
+          for (let i = 1; i < select.options.length; i++) {
+            const dbName = select.options[i].dataset.name;
+            if (dbName && dbName.includes(aiName)) {
+              bestMatchIndex = i;
+              bestMatchScore = 100;
+              break;
+            } else if (dbName && aiName.includes(dbName)) {
+              bestMatchIndex = i;
+              bestMatchScore = 90;
+            }
+          }
+
+          if (bestMatchIndex > 0) {
+            select.selectedIndex = bestMatchIndex;
+            updatePrice(select);
+          } else {
+            // Can't find match, just leave empty and let user know
+            console.warn("Không tìm thấy thuốc khớp với: " + med.name);
+          }
+
+          if (med.quantity) {
+            qtyInput.value = med.quantity;
+            calcTotal();
+          }
+        });
+        
+        alert("Đã đọc xong! AI đã tự động điền các thuốc nhận diện được. Vui lòng kiểm tra lại trước khi thanh toán.");
+      } else {
+        alert("AI không tìm thấy tên thuốc nào trong ảnh. Vui lòng thử lại ảnh rõ nét hơn.");
+      }
+
+    } catch (e) {
+      console.error(e);
+      loadingModal.hide();
+      alert("Đã xảy ra lỗi kết nối. Vui lòng thử lại sau.");
+    }
   }
 </script>

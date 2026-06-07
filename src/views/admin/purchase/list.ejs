@@ -1,0 +1,64 @@
+<%- /* Purchase List - Search + Pagination */ %>
+<div class="d-flex justify-content-between align-items-center mb-3 flex-wrap gap-2">
+  <h5 class="mb-0">Hóa đơn nhập hàng <span class="badge bg-primary fs-6"><%= pagination.total %></span></h5>
+  <div class="d-flex gap-2">
+    <a href="/admin/export/purchase/excel" class="btn btn-success btn-sm"><i class="bi bi-file-earmark-excel"></i> Xuất Excel</a>
+    <a href="/admin/purchase/create" class="btn btn-primary btn-sm"><i class="bi bi-plus-circle"></i> Nhập hàng mới</a>
+  </div>
+</div>
+
+<div class="card mb-3">
+  <div class="card-body py-2">
+    <form method="GET" action="/admin/purchase" class="row g-2 align-items-end">
+      <div class="col-md-3">
+        <label class="form-label small mb-1">Tìm nhà cung cấp</label>
+        <div class="input-group input-group-sm">
+          <span class="input-group-text"><i class="bi bi-search"></i></span>
+          <input type="text" name="keyword" class="form-control" placeholder="Tên nhà cung cấp..." value="<%= filters.keyword %>">
+        </div>
+      </div>
+      <div class="col-md-2">
+        <label class="form-label small mb-1">Từ ngày</label>
+        <input type="date" name="dateFrom" class="form-control form-control-sm" value="<%= filters.dateFrom %>">
+      </div>
+      <div class="col-md-2">
+        <label class="form-label small mb-1">Đến ngày</label>
+        <input type="date" name="dateTo" class="form-control form-control-sm" value="<%= filters.dateTo %>">
+      </div>
+      <div class="col-md-3 d-flex gap-2">
+        <button type="submit" class="btn btn-primary btn-sm flex-grow-1"><i class="bi bi-funnel"></i> Lọc</button>
+        <a href="/admin/purchase" class="btn btn-outline-secondary btn-sm"><i class="bi bi-x"></i> Xóa lọc</a>
+      </div>
+    </form>
+  </div>
+</div>
+
+<div class="card">
+  <div class="card-body p-0">
+    <table class="table table-hover mb-0">
+      <thead>
+        <tr><th>Mã HĐ Nhập</th><th>Ngày tạo</th><th>Nhà cung cấp</th><th>Thao tác</th></tr>
+      </thead>
+      <tbody>
+      <% if ((items||[]).length === 0) { %>
+        <tr><td colspan="4" class="text-center text-muted py-4"><i class="bi bi-inbox fs-4 d-block mb-2"></i>Không có hóa đơn nào</td></tr>
+      <% } %>
+      <% (items||[]).forEach(p => { %>
+        <tr>
+          <td><strong>PN-<%= p.id_purchase %></strong></td>
+          <td><%= new Date(p.date_create).toLocaleString('vi-VN') %></td>
+          <td><%= p.name_supplier %></td>
+          <td>
+            <a href="/admin/purchase/<%= p.id_purchase %>" class="btn btn-info btn-sm text-white"><i class="bi bi-eye"></i></a>
+            <form method="POST" action="/admin/purchase/delete/<%= p.id_purchase %>" class="d-inline"
+              onsubmit="return confirm('Xóa phiếu nhập? Các lô hàng vẫn được giữ lại trong kho.')">
+              <button class="btn btn-danger btn-sm"><i class="bi bi-trash"></i></button>
+            </form>
+          </td>
+        </tr>
+      <% }) %>
+      </tbody>
+    </table>
+  </div>
+</div>
+<%- include('../_pagination', { currentPage: pagination.currentPage, totalPages: pagination.totalPages, total: pagination.total, query: query, baseUrl: '/admin/purchase' }) %>

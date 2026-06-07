@@ -1,0 +1,35 @@
+<div class="mb-3"><a href="/admin/purchase" class="btn btn-secondary btn-sm"><i class="bi bi-arrow-left"></i> Quay lại</a></div>
+<div class="card mb-4"><div class="card-body">
+  <div class="row">
+    <div class="col-md-6">
+      <h6>Phiếu Nhập Hàng #PN-<%= item.id_purchase %></h6>
+      <p class="mb-1">Nhà cung cấp: <strong><%= item.name_supplier %></strong></p>
+    </div>
+    <div class="col-md-6 text-end">
+      <p class="mb-1">Ngày lập: <%= new Date(item.date_create).toLocaleString('vi-VN') %></p>
+    </div>
+  </div>
+</div></div>
+
+<div class="card"><div class="card-header fw-bold">Danh sách các lô hàng trong phiếu nhập</div>
+<div class="card-body p-0">
+<table class="table table-hover mb-0">
+  <thead><tr><th>Mã Lô</th><th>Thuốc</th><th class="text-center">Số lượng</th><th class="text-end">Giá nhập</th><th>Ngày SX</th><th>Hạn dùng</th><th class="text-end">Thành tiền</th></tr></thead>
+  <tbody>
+    <% let total = 0; (details||[]).forEach((d) => { const st = d.quantity_in_batch * d.entry_price; total += st; %>
+    <tr>
+      <td>L-<%= d.id_batch %></td>
+      <td><strong><%= d.name_medicine %></strong></td>
+      <td class="text-center"><%= d.quantity_in_batch %></td>
+      <td class="text-end"><%= Number(d.entry_price).toLocaleString('vi-VN') %>đ</td>
+      <td><%= d.manufacturing_date ? new Date(d.manufacturing_date).toLocaleDateString('vi-VN') : '' %></td>
+      <td class="text-danger"><%= d.expiry_date ? new Date(d.expiry_date).toLocaleDateString('vi-VN') : '' %></td>
+      <td class="text-end fw-semibold"><%= Number(st).toLocaleString('vi-VN') %>đ</td>
+    </tr>
+    <% }) %>
+  </tbody>
+  <tfoot class="table-light">
+    <tr><th colspan="6" class="text-end">Tổng giá trị phiếu nhập:</th><th class="text-end fs-5 text-primary"><%= Number(total).toLocaleString('vi-VN') %>đ</th></tr>
+  </tfoot>
+</table>
+</div></div>

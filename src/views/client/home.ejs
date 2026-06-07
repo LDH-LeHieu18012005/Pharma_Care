@@ -1,0 +1,133 @@
+<!-- Banner Section -->
+<div class="container mt-4 mb-5">
+  <div class="row g-3">
+    <div class="col-lg-8">
+      <div class="card bg-primary text-white h-100 border-0" style="border-radius: var(--radius-md); min-height: 300px; position: relative; overflow: hidden;">
+        <div class="card-body d-flex flex-column justify-content-center position-relative z-1 p-5">
+          <span class="badge bg-white text-primary mb-3 align-self-start" style="font-size: 0.9rem;">Siêu khuyến mãi</span>
+          <h2 class="display-5 fw-bold mb-3" style="font-family: 'Be Vietnam Pro', sans-serif;">Bảo vệ sức khỏe<br>Gia đình bạn</h2>
+          <p class="fs-5 mb-4 opacity-75">Giảm đến 50% các sản phẩm thực phẩm chức năng</p>
+          <div>
+            <button class="btn btn-light text-primary rounded-pill px-4 py-2 fw-bold shadow-sm">Mua ngay</button>
+          </div>
+        </div>
+        <!-- Decorative shapes for banner -->
+        <div style="position: absolute; right: -50px; top: -50px; width: 300px; height: 300px; background: rgba(255,255,255,0.1); border-radius: 50%;"></div>
+        <div style="position: absolute; right: 100px; bottom: -100px; width: 250px; height: 250px; background: rgba(255,255,255,0.1); border-radius: 50%;"></div>
+      </div>
+    </div>
+    <div class="col-lg-4 d-flex flex-column gap-3">
+      <div class="card border-0 text-white flex-grow-1" style="background: linear-gradient(135deg, #10b981, #059669); border-radius: var(--radius-md);">
+        <div class="card-body p-4">
+          <h4 class="fw-bold mb-1">Mua thuốc online</h4>
+          <p class="mb-3 opacity-75">Giao hàng siêu tốc 2h</p>
+          <button class="btn btn-outline-light rounded-pill btn-sm">Xem chi tiết</button>
+        </div>
+      </div>
+      <div class="card border-0 text-white flex-grow-1" style="background: linear-gradient(135deg, #f59e0b, #d97706); border-radius: var(--radius-md);">
+        <div class="card-body p-4">
+          <h4 class="fw-bold mb-1">Tích điểm đổi quà</h4>
+          <p class="mb-3 opacity-75">Ưu đãi thành viên mới</p>
+          <button class="btn btn-outline-light rounded-pill btn-sm">Đăng ký ngay</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Categories -->
+<div class="container mb-5">
+  <div class="d-flex align-items-center justify-content-between mb-4">
+    <h3 class="fw-bold m-0" style="color: var(--primary-dark); font-family: 'Be Vietnam Pro', sans-serif;">Danh mục nổi bật</h3>
+  </div>
+  <div class="row row-cols-2 row-cols-md-4 row-cols-lg-6 g-3">
+    <% if(types && types.length > 0) { %>
+      <% 
+        const icons = ['bi-capsule', 'bi-bandaid', 'bi-heart-pulse', 'bi-thermometer-half', 'bi-lungs', 'bi-eyedropper'];
+        const colors = ['#e8f5e9', '#e3f2fd', '#fff3e0', '#fce4ec', '#f3e5f5', '#e0f7fa'];
+        const textColors = ['#2e7d32', '#1565c0', '#e65100', '#c2185b', '#6a1b9a', '#006064'];
+        types.forEach((type, index) => { 
+          const icon = icons[index % icons.length];
+          const bg = colors[index % colors.length];
+          const color = textColors[index % textColors.length];
+      %>
+        <div class="col">
+          <a href="/search?type=<%= type.id_type %>" class="text-decoration-none">
+            <div class="card h-100 border-0 text-center p-4 category-card shadow-sm" style="border-radius: var(--radius-md);">
+              <div class="mx-auto mb-3 d-flex align-items-center justify-content-center" style="width: 70px; height: 70px; border-radius: 50%; background-color: <%= bg %>; color: <%= color %>;">
+                <i class="bi <%= icon %> fs-2"></i>
+              </div>
+              <h6 class="text-main fw-bold m-0" style="font-size: 0.95rem; line-height: 1.4;"><%= type.name_type %></h6>
+            </div>
+          </a>
+        </div>
+      <% }) %>
+    <% } else { %>
+      <div class="col-12"><p class="text-muted">Chưa có danh mục nào.</p></div>
+    <% } %>
+  </div>
+</div>
+
+<!-- Featured Products -->
+<div class="container mb-5">
+  <div class="d-flex align-items-center justify-content-between mb-4">
+    <h3 class="fw-bold m-0" style="color: var(--primary-dark); font-family: 'Be Vietnam Pro', sans-serif;">Sản phẩm bán chạy</h3>
+    <a href="#" class="text-primary text-decoration-none fw-bold">Xem tất cả <i class="bi bi-chevron-right"></i></a>
+  </div>
+  
+  <div class="row row-cols-1 row-cols-md-3 row-cols-lg-5 g-4">
+    <% if(medicines && medicines.length > 0) { %>
+      <% medicines.slice(0, 10).forEach(med => { %>
+        <div class="col">
+          <a href="/product/<%= med.id_medicine %>" class="text-decoration-none text-dark">
+            <div class="card h-100 border-0 shadow-sm position-relative product-card" style="border-radius: var(--radius-md);">
+              <% if (med.price < 50000) { %>
+                <span class="badge bg-danger position-absolute top-0 start-0 m-2 z-1">Bán chạy</span>
+              <% } %>
+              <div class="p-3 text-center">
+                <% if (med.images) { %>
+                  <img src="<%= med.images %>" class="img-fluid rounded" alt="<%= med.name_medicine %>" style="height: 150px; object-fit: contain;">
+                <% } else { %>
+                  <div class="bg-light rounded d-flex align-items-center justify-content-center" style="height: 150px; color: var(--text-muted);">
+                    <i class="bi bi-image fs-1"></i>
+                  </div>
+                <% } %>
+              </div>
+              <div class="card-body d-flex flex-column p-3">
+                <span class="text-muted small mb-1"><%= med.name_type || 'Chưa phân loại' %></span>
+                <h6 class="card-title text-main fw-bold mb-2 text-truncate" title="<%= med.name_medicine %>"><%= med.name_medicine %></h6>
+                
+                <div class="mt-auto">
+                  <div class="d-flex align-items-end gap-2 mb-3">
+                    <h5 class="text-primary fw-bold mb-0"><%= new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(med.price) %></h5>
+                    <% if (med.price > 100000) { %>
+                      <small class="text-muted text-decoration-line-through"><%= new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(med.price * 1.2) %></small>
+                    <% } %>
+                  </div>
+                  <form action="/cart/add" method="POST">
+                    <input type="hidden" name="medicineId" value="<%= med.id_medicine %>">
+                    <input type="hidden" name="quantity" value="1">
+                    <button type="submit" class="btn btn-outline-primary w-100 rounded-pill btn-sm fw-bold add-cart-btn" onclick="event.stopPropagation();">
+                      Thêm vào giỏ
+                    </button>
+                  </form>
+                </div>
+              </div>
+            </div>
+          </a>
+        </div>
+      <% }) %>
+    <% } else { %>
+      <div class="col-12"><p class="text-muted">Chưa có sản phẩm nào.</p></div>
+    <% } %>
+  </div>
+</div>
+
+<style>
+  .product-card { transition: all 0.3s ease; border: 1px solid transparent; }
+  .product-card:hover { transform: translateY(-5px); box-shadow: var(--shadow-lg) !important; border-color: var(--primary) !important; }
+  .product-card:hover .add-cart-btn { background-color: var(--primary); color: white; }
+  .category-card { transition: all 0.3s ease; border: 1px solid transparent !important; }
+  .category-card:hover { transform: translateY(-5px); border-color: var(--primary) !important; box-shadow: var(--shadow-lg) !important;}
+  .category-card:hover h6 { color: var(--primary) !important; }
+</style>

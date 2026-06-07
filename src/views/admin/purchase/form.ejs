@@ -1,0 +1,77 @@
+<div class="card"><div class="card-body">
+<form method="POST" action="/admin/purchase/create" id="purchaseForm">
+  <div class="row mb-4">
+    <div class="col-md-6">
+      <label class="form-label">Chọn Nhà Cung Cấp *</label>
+      <select name="id_supplier" class="form-select" required>
+        <option value="">-- Chọn NCC --</option>
+        <% (suppliers||[]).forEach(s => { %><option value="<%= s.id_supplier %>"><%= s.name_supplier %></option><% }) %>
+      </select>
+    </div>
+  </div>
+  
+  <h6 class="border-bottom pb-2 mb-3">Nhập danh sách lô thuốc</h6>
+  <div id="items-container">
+    <div class="row g-2 mb-3 item-row align-items-end p-2 bg-light rounded">
+      <div class="col-md-3">
+        <label class="form-label small">Chọn thuốc</label>
+        <select name="id_medicine" class="form-select" required>
+          <option value="">-- Chọn thuốc --</option>
+          <% (medicines||[]).forEach(m => { %><option value="<%= m.id_medicine %>"><%= m.name_medicine %></option><% }) %>
+        </select>
+      </div>
+      <div class="col-md-2">
+        <label class="form-label small">Số lượng</label>
+        <input type="number" name="quantity_in_batch" class="form-control qty-input" value="1" min="1" onchange="calcTotal()" required>
+      </div>
+      <div class="col-md-2">
+        <label class="form-label small">Giá nhập (VNĐ)</label>
+        <input type="number" name="entry_price" class="form-control price-input" value="0" min="0" onchange="calcTotal()" required>
+      </div>
+      <div class="col-md-2">
+        <label class="form-label small">Ngày SX</label>
+        <input type="date" name="manufacturing_date" class="form-control" required>
+      </div>
+      <div class="col-md-2">
+        <label class="form-label small">Hạn dùng</label>
+        <input type="date" name="expiry_date" class="form-control" required>
+      </div>
+      <div class="col-md-1">
+        <button type="button" class="btn btn-danger btn-sm mb-1" onclick="if(document.querySelectorAll('.item-row').length > 1) { this.closest('.item-row').remove(); calcTotal(); }"><i class="bi bi-trash"></i></button>
+      </div>
+    </div>
+  </div>
+  
+  <button type="button" class="btn btn-outline-primary btn-sm mb-4" onclick="addItemRow()"><i class="bi bi-plus"></i> Thêm thuốc vào lô</button>
+  
+  <div class="d-flex justify-content-between align-items-center p-3 rounded mb-3 border">
+    <h5 class="mb-0">Tổng tiền dự kiến:</h5><h4 class="mb-0 text-success" id="grandTotal">0đ</h4>
+  </div>
+  
+  <button class="btn btn-primary"><i class="bi bi-check-circle"></i> Xác nhận lưu Hóa Đơn & Nhập Kho</button> 
+  <a href="/admin/purchase" class="btn btn-secondary">Hủy</a>
+</form>
+</div></div>
+
+<script>
+  function calcTotal() {
+    let total = 0;
+    document.querySelectorAll('.item-row').forEach(row => {
+      const p = parseFloat(row.querySelector('.price-input').value) || 0;
+      const q = parseInt(row.querySelector('.qty-input').value) || 0;
+      total += p * q;
+    });
+    document.getElementById('grandTotal').innerText = total.toLocaleString('vi-VN') + 'đ';
+  }
+  
+  function addItemRow() {
+    const container = document.getElementById('items-container');
+    const row = container.querySelector('.item-row').cloneNode(true);
+    row.querySelector('select').value = '';
+    row.querySelector('.qty-input').value = '1';
+    row.querySelector('.price-input').value = '0';
+    row.querySelector('input[name="manufacturing_date"]').value = '';
+    row.querySelector('input[name="expiry_date"]').value = '';
+    container.appendChild(row);
+  }
+</script>

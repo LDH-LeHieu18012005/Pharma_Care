@@ -182,6 +182,7 @@ CREATE TABLE sales_invoice (
     id_staff INT UNSIGNED NOT NULL,
     id_customer INT UNSIGNED NOT NULL,
     status ENUM('cho_xu_ly', 'da_thanh_toan', 'da_huy') DEFAULT 'cho_xu_ly',
+    prescription_image VARCHAR(255),
     FOREIGN KEY (id_staff) REFERENCES staff(id_staff),
     FOREIGN KEY (id_customer) REFERENCES customer(id_customer)
 );

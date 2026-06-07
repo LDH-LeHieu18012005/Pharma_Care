@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <title>In Hóa Đơn #<%= item.id_sales %></title>
+  <style>
+    body { font-family: 'Courier New', Courier, monospace; font-size: 14px; max-width: 300px; margin: 0 auto; padding: 10px; color: #000; }
+    .text-center { text-align: center; }
+    .text-right { text-align: right; }
+    .fw-bold { font-weight: bold; }
+    .border-bottom { border-bottom: 1px dashed #000; padding-bottom: 10px; margin-bottom: 10px; }
+    .border-top { border-top: 1px dashed #000; padding-top: 10px; margin-top: 10px; }
+    table { width: 100%; border-collapse: collapse; }
+    th, td { text-align: left; padding: 4px 0; vertical-align: top; }
+    th.qty, td.qty { text-align: center; width: 40px; }
+    th.price, td.price { text-align: right; }
+    @media print { body { max-width: 100%; margin: 0; padding: 0; } }
+  </style>
+</head>
+<body onload="window.print()">
+  <div class="text-center border-bottom">
+    <h2 style="margin: 0;">PHARMA CARE</h2>
+    <p style="margin: 5px 0;">Đ/C: 123 Đường Dược Lý, Hà Nội</p>
+    <p style="margin: 5px 0;">SĐT: 0123 456 789</p>
+  </div>
+  
+  <div class="text-center">
+    <h3 style="margin: 10px 0;">HÓA ĐƠN BÁN HÀNG</h3>
+  </div>
+
+  <div class="border-bottom">
+    <p style="margin: 3px 0;">Mã HĐ: <strong>HD-<%= item.id_sales %></strong></p>
+    <p style="margin: 3px 0;">Ngày: <%= new Date(item.date_create).toLocaleString('vi-VN') %></p>
+    <p style="margin: 3px 0;">Nhân viên: <%= item.name_staff %></p>
+    <p style="margin: 3px 0;">Khách hàng: <%= item.name_customer || 'Khách lẻ' %></p>
+  </div>
+
+  <table>
+    <thead>
+      <tr><th>SP</th><th class="qty">SL</th><th class="price">T.Tiền</th></tr>
+    </thead>
+    <tbody>
+      <% let total = 0; (details||[]).forEach((d) => { const st = d.quantity_sales * d.price; total += st; %>
+      <tr>
+        <td><%= d.name_medicine %><br><small><%= Number(d.price).toLocaleString('vi-VN') %></small></td>
+        <td class="qty"><%= d.quantity_sales %></td>
+        <td class="price"><%= Number(st).toLocaleString('vi-VN') %></td>
+      </tr>
+      <% }) %>
+    </tbody>
+  </table>
+
+  <div class="border-top text-right">
+    <p style="font-size: 16px; margin: 5px 0;">Tổng cộng: <strong style="font-size: 18px;"><%= Number(total).toLocaleString('vi-VN') %>đ</strong></p>
+  </div>
+
+  <div class="text-center" style="margin-top: 20px;">
+    <p>Cảm ơn quý khách và hẹn gặp lại!</p>
+    <p><small>(Hàng mua rồi miễn đổi trả)</small></p>
+  </div>
+</body>
+</html>

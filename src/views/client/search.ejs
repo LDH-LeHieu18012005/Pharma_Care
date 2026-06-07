@@ -1,0 +1,120 @@
+<div class="container mt-4 mb-5 min-vh-100">
+  <div class="row">
+    <!-- Sidebar Filter -->
+    <div class="col-lg-3 mb-4">
+      <div class="card border-0 shadow-sm" style="border-radius: var(--radius-md);">
+        <div class="card-body">
+          <h5 class="fw-bold mb-3"><i class="bi bi-funnel text-primary me-2"></i>Bộ lọc tìm kiếm</h5>
+          <form action="/search" method="GET">
+            <% if(q) { %>
+              <input type="hidden" name="q" value="<%= q %>">
+            <% } %>
+            
+            <div class="mb-4">
+              <label class="fw-bold mb-2">Danh mục sản phẩm</label>
+              <% if(typeof types !== 'undefined' && types.length > 0) { %>
+                <% types.forEach(t => { %>
+                  <div class="form-check mb-2">
+                    <input class="form-check-input" type="radio" name="type" id="type_<%= t.id_type %>" value="<%= t.id_type %>" <%= (typeof type !== 'undefined' && type == t.id_type) ? 'checked' : '' %>>
+                    <label class="form-check-label" for="type_<%= t.id_type %>">
+                      <%= t.name_type %>
+                    </label>
+                  </div>
+                <% }) %>
+              <% } %>
+            </div>
+            
+            <div class="mb-4">
+              <label class="fw-bold mb-2">Khoảng giá</label>
+              <div class="form-check mb-2">
+                <input class="form-check-input" type="radio" name="maxPrice" id="price1" value="" <%= (typeof maxPrice === 'undefined' || maxPrice == '') ? 'checked' : '' %>>
+                <label class="form-check-label" for="price1">Tất cả mức giá</label>
+              </div>
+              <div class="form-check mb-2">
+                <input class="form-check-input" type="radio" name="maxPrice" id="price2" value="100000" <%= (typeof maxPrice !== 'undefined' && maxPrice == '100000') ? 'checked' : '' %>>
+                <label class="form-check-label" for="price2">Dưới 100.000đ</label>
+              </div>
+              <div class="form-check mb-2">
+                <input class="form-check-input" type="radio" name="maxPrice" id="price3" value="300000" <%= (typeof maxPrice !== 'undefined' && maxPrice == '300000') ? 'checked' : '' %>>
+                <label class="form-check-label" for="price3">Dưới 300.000đ</label>
+              </div>
+              <div class="form-check mb-2">
+                <input class="form-check-input" type="radio" name="maxPrice" id="price4" value="500000" <%= (typeof maxPrice !== 'undefined' && maxPrice == '500000') ? 'checked' : '' %>>
+                <label class="form-check-label" for="price4">Dưới 500.000đ</label>
+              </div>
+            </div>
+            
+            <button type="submit" class="btn btn-primary w-100 rounded-pill fw-bold">Áp dụng lọc</button>
+            <a href="/search<%= q ? '?q='+q : '' %>" class="btn btn-outline-secondary w-100 rounded-pill fw-bold mt-2">Bỏ lọc</a>
+          </form>
+        </div>
+      </div>
+    </div>
+    
+    <!-- Results -->
+    <div class="col-lg-9">
+      <div class="mb-4">
+        <h3 class="fw-bold" style="font-family: 'Be Vietnam Pro', sans-serif;">
+          <% if(q) { %>
+            Kết quả tìm kiếm cho "<span class="text-primary"><%= q %></span>"
+          <% } else { %>
+            Tất cả sản phẩm
+          <% } %>
+        </h3>
+        <p class="text-muted">Tìm thấy <%= results ? results.length : 0 %> sản phẩm</p>
+      </div>
+
+      <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 row-cols-xl-4 g-4">
+        <% if(results && results.length > 0) { %>
+          <% results.forEach(med => { %>
+            <div class="col">
+              <a href="/product/<%= med.id_medicine %>" class="text-decoration-none text-dark">
+                <div class="card h-100 border-0 shadow-sm position-relative product-card" style="border-radius: var(--radius-md);">
+                  <div class="p-3 text-center">
+                    <% if (med.images) { %>
+                      <img src="<%= med.images %>" class="img-fluid rounded" alt="<%= med.name_medicine %>" style="height: 150px; object-fit: contain;">
+                    <% } else { %>
+                      <div class="bg-light rounded d-flex align-items-center justify-content-center" style="height: 150px; color: var(--text-muted);">
+                        <i class="bi bi-image fs-1"></i>
+                      </div>
+                    <% } %>
+                  </div>
+                  <div class="card-body d-flex flex-column p-3">
+                    <span class="text-muted small mb-1"><%= med.name_type || 'Chưa phân loại' %></span>
+                    <h6 class="card-title text-main fw-bold mb-2 text-truncate" title="<%= med.name_medicine %>"><%= med.name_medicine %></h6>
+                    
+                    <div class="mt-auto">
+                      <h5 class="text-primary fw-bold mb-3"><%= new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(med.price) %></h5>
+                      
+                      <form action="/cart/add" method="POST">
+                        <input type="hidden" name="medicineId" value="<%= med.id_medicine %>">
+                        <input type="hidden" name="quantity" value="1">
+                        <button type="submit" class="btn btn-outline-primary w-100 rounded-pill btn-sm fw-bold add-cart-btn" onclick="event.stopPropagation();">
+                          Thêm vào giỏ
+                        </button>
+                      </form>
+                    </div>
+                  </div>
+                </div>
+              </a>
+            </div>
+          <% }) %>
+        <% } else { %>
+          <div class="col-12">
+            <div class="text-center p-5 bg-white rounded-3 shadow-sm" style="border-radius: var(--radius-md);">
+              <i class="bi bi-search text-muted mb-3 d-block" style="font-size: 3rem;"></i>
+              <h5 class="text-muted">Không tìm thấy sản phẩm nào phù hợp.</h5>
+              <a href="/" class="btn btn-primary mt-3 rounded-pill px-4">Quay về trang chủ</a>
+            </div>
+          </div>
+        <% } %>
+      </div>
+    </div>
+  </div>
+</div>
+
+<style>
+  .product-card { transition: all 0.3s ease; border: 1px solid transparent; }
+  .product-card:hover { transform: translateY(-5px); box-shadow: var(--shadow-lg) !important; border-color: var(--primary) !important; }
+  .product-card:hover .add-cart-btn { background-color: var(--primary); color: white; }
+</style>

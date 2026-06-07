@@ -1,0 +1,24 @@
+<div class="d-flex justify-content-between mb-3">
+  <h5>Danh mục Ca làm việc</h5>
+  <a href="/admin/shift/create" class="btn btn-primary btn-sm"><i class="bi bi-plus-circle"></i> Thêm ca mới</a>
+</div>
+<div class="card"><div class="card-body p-0">
+<table class="table table-hover mb-0">
+  <thead><tr><th>#</th><th>Giờ bắt đầu</th><th>Mô tả / Tên ca</th><th>Thao tác</th></tr></thead>
+  <tbody>
+  <% (items||[]).forEach((s) => { %>
+    <tr>
+      <td><%= s.id_shift %></td>
+      <td><strong><%= s.start_time %></strong></td>
+      <td><%= s.description %></td>
+      <td>
+        <a href="/admin/shift/edit/<%= s.id_shift %>" class="btn btn-warning btn-sm"><i class="bi bi-pencil"></i></a>
+        <form method="POST" action="/admin/shift/delete/<%= s.id_shift %>" class="d-inline" onsubmit="return confirm('Xóa ca làm việc này?')">
+          <button class="btn btn-danger btn-sm"><i class="bi bi-trash"></i></button>
+        </form>
+      </td>
+    </tr>
+  <% }) %>
+  </tbody>
+</table>
+</div></div>

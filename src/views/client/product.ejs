@@ -1,0 +1,97 @@
+<div class="container mt-4 mb-5">
+  <nav aria-label="breadcrumb">
+    <ol class="breadcrumb">
+      <li class="breadcrumb-item"><a href="/" class="text-decoration-none text-primary">Trang chủ</a></li>
+      <li class="breadcrumb-item active" aria-current="page"><%= medicine.name_medicine %></li>
+    </ol>
+  </nav>
+
+  <div class="row g-4 mb-5">
+    <!-- Product Image -->
+    <div class="col-md-5">
+      <div class="card border-0 shadow-sm" style="border-radius: var(--radius-md);">
+        <div class="card-body p-4 text-center">
+          <% if (medicine.images) { %>
+            <img src="<%= medicine.images %>" class="img-fluid rounded" alt="<%= medicine.name_medicine %>">
+          <% } else { %>
+            <div class="bg-light rounded d-flex align-items-center justify-content-center" style="height: 300px; color: var(--text-muted);">
+              <i class="bi bi-image" style="font-size: 5rem;"></i>
+            </div>
+          <% } %>
+        </div>
+      </div>
+    </div>
+
+    <!-- Product Info -->
+    <div class="col-md-7">
+      <h2 class="fw-bold text-main mb-3" style="font-family: 'Be Vietnam Pro', sans-serif;"><%= medicine.name_medicine %></h2>
+      <div class="d-flex align-items-center gap-3 mb-4">
+        <span class="badge bg-success">Còn hàng (<%= medicine.quantity_total %>)</span>
+        <span class="text-muted">|</span>
+        <span class="text-muted">Đã bán 124</span>
+      </div>
+
+      <div class="bg-primary-light p-4 mb-4" style="border-radius: var(--radius-md);">
+        <h1 class="text-primary fw-bold m-0" style="font-family: 'Be Vietnam Pro', sans-serif;">
+          <%= new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(medicine.price) %>
+        </h1>
+      </div>
+
+      <p class="text-muted mb-4 fs-5"><%= medicine.descriptions || 'Đang cập nhật mô tả...' %></p>
+
+      <form action="/cart/add" method="POST" class="d-flex align-items-end gap-3 mb-4">
+        <input type="hidden" name="medicineId" value="<%= medicine.id_medicine %>">
+        <div style="width: 120px;">
+          <label class="form-label text-muted small">Số lượng</label>
+          <input type="number" name="quantity" class="form-control" value="1" min="1" max="<%= medicine.quantity_total %>">
+        </div>
+        <button type="submit" class="btn btn-primary flex-grow-1 py-2 fw-bold" style="border-radius: var(--radius-full);">
+          <i class="bi bi-cart-plus me-2"></i> CHỌN MUA
+        </button>
+      </form>
+
+      <div class="card border-0 bg-light" style="border-radius: var(--radius-md);">
+        <div class="card-body p-3">
+          <ul class="list-unstyled m-0 text-muted small">
+            <li class="mb-2"><i class="bi bi-truck text-primary me-2"></i> Miễn phí giao hàng toàn quốc cho đơn từ 300.000đ</li>
+            <li class="mb-2"><i class="bi bi-box-seam text-primary me-2"></i> Đổi trả miễn phí trong 30 ngày</li>
+            <li><i class="bi bi-shield-check text-primary me-2"></i> Cam kết hàng chính hãng 100%</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Related Products -->
+  <% if (related && related.length > 0) { %>
+    <h4 class="fw-bold text-primary-dark mb-4" style="font-family: 'Be Vietnam Pro', sans-serif;">Sản phẩm cùng loại</h4>
+    <div class="row row-cols-1 row-cols-md-3 row-cols-lg-5 g-4">
+      <% related.forEach(med => { %>
+        <div class="col">
+          <a href="/product/<%= med.id_medicine %>" class="text-decoration-none">
+            <div class="card h-100 border-0 shadow-sm product-card" style="border-radius: var(--radius-md);">
+              <div class="p-3 text-center">
+                <% if (med.images) { %>
+                  <img src="<%= med.images %>" class="img-fluid rounded" alt="<%= med.name_medicine %>" style="height: 120px; object-fit: contain;">
+                <% } else { %>
+                  <div class="bg-light rounded d-flex align-items-center justify-content-center" style="height: 120px; color: var(--text-muted);">
+                    <i class="bi bi-image fs-1"></i>
+                  </div>
+                <% } %>
+              </div>
+              <div class="card-body p-3">
+                <h6 class="card-title text-main fw-bold text-truncate"><%= med.name_medicine %></h6>
+                <h6 class="text-primary fw-bold m-0"><%= new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(med.price) %></h6>
+              </div>
+            </div>
+          </a>
+        </div>
+      <% }) %>
+    </div>
+  <% } %>
+</div>
+
+<style>
+  .product-card { transition: all 0.3s ease; }
+  .product-card:hover { transform: translateY(-5px); box-shadow: var(--shadow-md) !important; border-color: var(--primary) !important; }
+</style>

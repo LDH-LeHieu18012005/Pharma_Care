@@ -1,0 +1,28 @@
+<div class="card"><div class="card-body">
+<form method="POST" action="/admin/assignment/<%= item ? 'edit/'+item.id_assignment : 'create' %>">
+  <div class="row g-3">
+    <div class="col-md-4">
+      <label class="form-label">Ngày làm việc *</label>
+      <input type="date" name="dates" class="form-control" value="<%= item ? new Date(item.dates).toISOString().split('T')[0] : '' %>" required>
+    </div>
+    <div class="col-md-4">
+      <label class="form-label">Ca làm việc *</label>
+      <select name="id_shift" class="form-select" required>
+        <option value="">-- Chọn Ca --</option>
+        <% (shifts||[]).forEach(s => { %><option value="<%= s.id_shift %>" <%= item && item.id_shift==s.id_shift ? 'selected' : '' %>><%= s.description %></option><% }) %>
+      </select>
+    </div>
+    <div class="col-md-4">
+      <label class="form-label">Nhân viên *</label>
+      <select name="id_staff" class="form-select" required>
+        <option value="">-- Chọn Nhân Viên --</option>
+        <% (staffs||[]).forEach(st => { %><option value="<%= st.id_staff %>" <%= item && item.id_staff==st.id_staff ? 'selected' : '' %>><%= st.name_staff %></option><% }) %>
+      </select>
+    </div>
+  </div>
+  <div class="mt-3">
+    <button class="btn btn-primary"><%= item ? 'Cập nhật' : 'Phân công' %></button> 
+    <a href="/admin/assignment" class="btn btn-secondary">Hủy</a>
+  </div>
+</form>
+</div></div>

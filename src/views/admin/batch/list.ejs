@@ -1,8 +1,73 @@
-<div class="d-flex justify-content-between mb-3"><h5>Lô hàng</h5><a href="/admin/batch/create" class="btn btn-primary btn-sm"><i class="bi bi-plus"></i> Nhập lô hàng</a></div>
-<div class="card"><div class="card-body p-0"><table class="table table-hover mb-0"><thead><tr><th>#</th><th>Tên thuốc</th><th>Số lượng</th><th>Giá nhập</th><th>Ngày SX</th><th>Hạn sử dụng</th><th>Trạng thái</th><th>Thao tác</th></tr></thead>
-<tbody><% (items||[]).forEach((b,i) => { %><tr><td><%= b.id_batch %></td><td><strong><%= b.name_medicine %></strong></td>
-<td><%= b.quantity_in_batch %></td><td><%= Number(b.entry_price).toLocaleString('vi-VN') %>đ</td>
-<td><%= b.manufacturing_date ? new Date(b.manufacturing_date).toLocaleDateString('vi-VN') : '' %></td>
-<td class="<%= b.expiry_date && new Date(b.expiry_date) < new Date(Date.now() + 30*24*60*60*1000) ? 'text-danger fw-bold' : '' %>"><%= b.expiry_date ? new Date(b.expiry_date).toLocaleDateString('vi-VN') : '' %></td>
-<td><span class="badge bg-<%= b.status=='con_hang'?'success':(b.status=='het_han'?'danger':'warning') %>"><%= b.status %></span></td>
-<td><form method="POST" action="/admin/batch/delete/<%= b.id_batch %>" class="d-inline" onsubmit="return confirm('Cảnh báo: Xóa lô hàng không làm giảm tồn kho hiện tại. Tiếp tục?')"><button class="btn btn-danger btn-sm"><i class="bi bi-trash"></i></button></form></td></tr><% }) %></tbody></table></div></div>
+<%- /* Batch List - Search + Pagination */ %>
+<div class="d-flex justify-content-between align-items-center mb-3 flex-wrap gap-2">
+  <h5 class="mb-0">Lô hàng <span class="badge bg-primary fs-6"><%= pagination.total %></span></h5>
+  <div class="d-flex gap-2">
+    <a href="/admin/export/batch/excel" class="btn btn-success btn-sm"><i class="bi bi-file-earmark-excel"></i> Xuất Excel</a>
+    <a href="/admin/batch/create" class="btn btn-primary btn-sm"><i class="bi bi-plus"></i> Nhập lô hàng</a>
+  </div>
+</div>
+
+<div class="card mb-3">
+  <div class="card-body py-2">
+    <form method="GET" action="/admin/batch" class="row g-2 align-items-end">
+      <div class="col-md-4">
+        <label class="form-label small mb-1">Tìm theo tên thuốc</label>
+        <div class="input-group input-group-sm">
+          <span class="input-group-text"><i class="bi bi-search"></i></span>
+          <input type="text" name="keyword" class="form-control" placeholder="Tên thuốc..." value="<%= filters.keyword %>">
+        </div>
+      </div>
+      <div class="col-md-2">
+        <label class="form-label small mb-1">Trạng thái</label>
+        <select name="status" class="form-select form-select-sm">
+          <option value="">-- Tất cả --</option>
+          <option value="con_hang" <%= filters.status === 'con_hang' ? 'selected' : '' %>>Còn hàng</option>
+          <option value="het_hang" <%= filters.status === 'het_hang' ? 'selected' : '' %>>Hết hàng</option>
+          <option value="het_han" <%= filters.status === 'het_han' ? 'selected' : '' %>>Hết hạn</option>
+        </select>
+      </div>
+      <div class="col-md-3 d-flex gap-2">
+        <button type="submit" class="btn btn-primary btn-sm flex-grow-1"><i class="bi bi-funnel"></i> Lọc</button>
+        <a href="/admin/batch" class="btn btn-outline-secondary btn-sm"><i class="bi bi-x"></i> Xóa lọc</a>
+      </div>
+    </form>
+  </div>
+</div>
+
+<div class="card">
+  <div class="card-body p-0">
+    <table class="table table-hover mb-0">
+      <thead>
+        <tr><th>#</th><th>Tên thuốc</th><th>Số lượng</th><th>Giá nhập</th><th>Ngày SX</th><th>Hạn sử dụng</th><th>Trạng thái</th><th>Thao tác</th></tr>
+      </thead>
+      <tbody>
+      <% if ((items||[]).length === 0) { %>
+        <tr><td colspan="8" class="text-center text-muted py-4"><i class="bi bi-inbox fs-4 d-block mb-2"></i>Không có lô hàng nào</td></tr>
+      <% } %>
+      <% (items||[]).forEach((b, i) => { %>
+        <tr>
+          <td><%= b.id_batch %></td>
+          <td><strong><%= b.name_medicine %></strong></td>
+          <td><%= b.quantity_in_batch %></td>
+          <td><%= Number(b.entry_price).toLocaleString('vi-VN') %>đ</td>
+          <td><%= b.manufacturing_date ? new Date(b.manufacturing_date).toLocaleDateString('vi-VN') : '' %></td>
+          <td class="<%= b.expiry_date && new Date(b.expiry_date) < new Date(Date.now() + 30*24*60*60*1000) ? 'text-danger fw-bold' : '' %>">
+            <%= b.expiry_date ? new Date(b.expiry_date).toLocaleDateString('vi-VN') : '' %>
+          </td>
+          <td>
+            <% const bMap = { con_hang: ['success','Còn hàng'], het_hang: ['warning','Hết hàng'], het_han: ['danger','Hết hạn'] }; %>
+            <span class="badge bg-<%= (bMap[b.status]||['secondary','?'])[0] %>"><%= (bMap[b.status]||['secondary',b.status])[1] %></span>
+          </td>
+          <td>
+            <form method="POST" action="/admin/batch/delete/<%= b.id_batch %>" class="d-inline"
+              onsubmit="return confirm('Xóa lô hàng? Lưu ý: không làm giảm tồn kho hiện tại.')">
+              <button class="btn btn-danger btn-sm"><i class="bi bi-trash"></i></button>
+            </form>
+          </td>
+        </tr>
+      <% }) %>
+      </tbody>
+    </table>
+  </div>
+</div>
+<%- include('../_pagination', { currentPage: pagination.currentPage, totalPages: pagination.totalPages, total: pagination.total, query: query, baseUrl: '/admin/batch' }) %>

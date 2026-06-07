@@ -1,26 +1,83 @@
-<div class="d-flex justify-content-between mb-3">
-  <h5>Danh sách thuốc</h5>
-  <a href="/admin/medicine/create" class="btn btn-primary btn-sm"><i class="bi bi-plus"></i> Thêm mới</a>
+<%- /* Medicine List - Search + Pagination */ %>
+<div class="d-flex justify-content-between align-items-center mb-3 flex-wrap gap-2">
+  <h5 class="mb-0">Danh sách thuốc <span class="badge bg-primary fs-6"><%= pagination.total %></span></h5>
+  <div class="d-flex gap-2">
+    <a href="/admin/export/medicine/excel" class="btn btn-success btn-sm"><i class="bi bi-file-earmark-excel"></i> Xuất Excel</a>
+    <a href="/admin/medicine/create" class="btn btn-primary btn-sm"><i class="bi bi-plus"></i> Thêm mới</a>
+  </div>
 </div>
-<div class="card"><div class="card-body p-0">
-<table class="table table-hover mb-0">
-  <thead><tr><th>#</th><th>Tên thuốc</th><th>Loại</th><th>Kệ</th><th>Giá</th><th>Tồn kho</th><th>Trạng thái</th><th>Thao tác</th></tr></thead>
-  <tbody>
-  <% (items||[]).forEach((m, i) => { %>
-    <tr>
-      <td><%= i+1 %></td>
-      <td><strong><%= m.name_medicine %></strong></td>
-      <td><%= m.name_type || '' %></td>
-      <td><%= m.name_rack || '' %></td>
-      <td><%= Number(m.price).toLocaleString('vi-VN') %>đ</td>
-      <td><span class="badge bg-<%= m.quantity_total <= 10 ? 'danger' : 'success' %>"><%= m.quantity_total %></span></td>
-      <td><span class="badge bg-<%= m.medicine_status === 'con_hang' ? 'success' : 'secondary' %>"><%= m.medicine_status %></span></td>
-      <td>
-        <a href="/admin/medicine/edit/<%= m.id_medicine %>" class="btn btn-warning btn-sm"><i class="bi bi-pencil"></i></a>
-        <form method="POST" action="/admin/medicine/delete/<%= m.id_medicine %>" class="d-inline" onsubmit="return confirm('Xóa?')"><button class="btn btn-danger btn-sm"><i class="bi bi-trash"></i></button></form>
-      </td>
-    </tr>
-  <% }) %>
-  </tbody>
-</table>
-</div></div>
+
+<%# Search / Filter Form %>
+<div class="card mb-3">
+  <div class="card-body py-2">
+    <form method="GET" action="/admin/medicine" class="row g-2 align-items-end">
+      <div class="col-md-4">
+        <label class="form-label small mb-1">Tìm theo tên thuốc</label>
+        <div class="input-group input-group-sm">
+          <span class="input-group-text"><i class="bi bi-search"></i></span>
+          <input type="text" name="keyword" class="form-control" placeholder="Nhập tên thuốc..." value="<%= filters.keyword %>">
+        </div>
+      </div>
+      <div class="col-md-3">
+        <label class="form-label small mb-1">Loại thuốc</label>
+        <select name="typeId" class="form-select form-select-sm">
+          <option value="">-- Tất cả loại --</option>
+          <% (types||[]).forEach(t => { %>
+          <option value="<%= t.id_type %>" <%= filters.typeId == t.id_type ? 'selected' : '' %>><%= t.name_type %></option>
+          <% }) %>
+        </select>
+      </div>
+      <div class="col-md-2">
+        <label class="form-label small mb-1">Trạng thái</label>
+        <select name="status" class="form-select form-select-sm">
+          <option value="">-- Tất cả --</option>
+          <option value="con_hang" <%= filters.status === 'con_hang' ? 'selected' : '' %>>Còn hàng</option>
+          <option value="het_hang" <%= filters.status === 'het_hang' ? 'selected' : '' %>>Hết hàng</option>
+          <option value="ngung_kinh_doanh" <%= filters.status === 'ngung_kinh_doanh' ? 'selected' : '' %>>Ngừng KD</option>
+        </select>
+      </div>
+      <div class="col-md-3 d-flex gap-2">
+        <button type="submit" class="btn btn-primary btn-sm flex-grow-1"><i class="bi bi-funnel"></i> Lọc</button>
+        <a href="/admin/medicine" class="btn btn-outline-secondary btn-sm"><i class="bi bi-x"></i> Xóa lọc</a>
+      </div>
+    </form>
+  </div>
+</div>
+
+<div class="card">
+  <div class="card-body p-0">
+    <table class="table table-hover mb-0">
+      <thead>
+        <tr>
+          <th>#</th><th>Tên thuốc</th><th>Loại</th><th>Kệ</th><th>Giá</th><th>Tồn kho</th><th>Trạng thái</th><th>Thao tác</th>
+        </tr>
+      </thead>
+      <tbody>
+      <% if ((items||[]).length === 0) { %>
+        <tr><td colspan="8" class="text-center text-muted py-4"><i class="bi bi-inbox fs-4 d-block mb-2"></i>Không có dữ liệu phù hợp</td></tr>
+      <% } %>
+      <% (items||[]).forEach((m, i) => { %>
+        <tr>
+          <td><%= (pagination.currentPage - 1) * pagination.limit + i + 1 %></td>
+          <td><strong><%= m.name_medicine %></strong></td>
+          <td><%= m.name_type || '' %></td>
+          <td><%= m.name_rack || '' %></td>
+          <td><%= Number(m.price).toLocaleString('vi-VN') %>đ</td>
+          <td><span class="badge bg-<%= m.quantity_total <= 10 ? 'danger' : 'success' %>"><%= m.quantity_total %></span></td>
+          <td>
+            <% const statusMap = { con_hang: ['success','Còn hàng'], het_hang: ['warning','Hết hàng'], ngung_kinh_doanh: ['secondary','Ngừng KD'] }; %>
+            <span class="badge bg-<%= (statusMap[m.medicine_status]||['secondary','?'])[0] %>"><%= (statusMap[m.medicine_status]||['secondary',m.medicine_status])[1] %></span>
+          </td>
+          <td>
+            <a href="/admin/medicine/edit/<%= m.id_medicine %>" class="btn btn-warning btn-sm"><i class="bi bi-pencil"></i></a>
+            <form method="POST" action="/admin/medicine/delete/<%= m.id_medicine %>" class="d-inline" onsubmit="return confirm('Xóa thuốc này?')">
+              <button class="btn btn-danger btn-sm"><i class="bi bi-trash"></i></button>
+            </form>
+          </td>
+        </tr>
+      <% }) %>
+      </tbody>
+    </table>
+  </div>
+</div>
+<%- include('../_pagination', { currentPage: pagination.currentPage, totalPages: pagination.totalPages, total: pagination.total, query: query, baseUrl: '/admin/medicine' }) %>

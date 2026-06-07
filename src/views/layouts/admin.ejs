@@ -6,48 +6,107 @@
   <title><%= title %> | Pharma Care</title>
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
   <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
+  <link href="/css/style.css" rel="stylesheet">
   <style>
-    body { font-family: 'Segoe UI', sans-serif; background: #f0f2f5; }
-    .sidebar { width: 250px; min-height: 100vh; background: #1a237e; position: fixed; top: 0; left: 0; color: #fff; }
-    .sidebar .brand { padding: 20px; font-size: 1.3rem; font-weight: 700; border-bottom: 1px solid rgba(255,255,255,.1); }
-    .sidebar .nav-link { color: rgba(255,255,255,.7); padding: 10px 20px; display: flex; align-items: center; gap: 10px; text-decoration: none; font-size: .9rem; }
-    .sidebar .nav-link:hover, .sidebar .nav-link.active { color: #fff; background: rgba(255,255,255,.1); }
-    .sidebar .nav-link i { font-size: 1.1rem; width: 20px; text-align: center; }
-    .main-content { margin-left: 250px; padding: 20px; }
-    .topbar { background: #fff; padding: 12px 20px; margin: -20px -20px 20px; box-shadow: 0 1px 3px rgba(0,0,0,.1); display: flex; justify-content: space-between; align-items: center; }
-    .card-stat { border: none; border-radius: 12px; box-shadow: 0 2px 8px rgba(0,0,0,.08); }
-    .card-stat .card-body { padding: 20px; }
-    .card-stat .stat-icon { width: 50px; height: 50px; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 1.5rem; }
-    .table th { background: #f8f9fa; font-weight: 600; font-size: .85rem; text-transform: uppercase; }
-    .btn-sm { font-size: .8rem; }
+    /* Specific layout styles */
+    .app-container { display: flex; min-height: 100vh; }
+    .sidebar-wrapper { width: 260px; flex-shrink: 0; position: fixed; top: 0; left: 0; z-index: 1000; }
+    .main-wrapper { flex-grow: 1; margin-left: 260px; display: flex; flex-direction: column; min-height: 100vh; }
+    .brand-logo { font-size: 1.75rem; font-weight: 700; color: var(--primary-dark); display: flex; align-items: center; gap: 0.75rem; font-family: 'Be Vietnam Pro', sans-serif; letter-spacing: -0.02em; }
+    .brand-logo i { color: var(--primary); font-size: 1.8rem; }
+    
+    .user-profile { display: flex; align-items: center; gap: 10px; background: #ffffff; padding: 6px 14px 6px 6px; border-radius: 9999px; border: 1px solid var(--border); box-shadow: var(--shadow-sm); transition: all 0.2s; }
+    .user-profile:hover { box-shadow: var(--shadow-md); border-color: var(--primary); }
+    .user-avatar { width: 38px; height: 38px; border-radius: 50%; object-fit: cover; background: var(--primary-light); color: var(--primary); display: flex; align-items: center; justify-content: center; font-weight: bold; border: 1px solid rgba(29, 72, 186, 0.2); }
+    .sidebar-wrapper { width: 260px; flex-shrink: 0; position: fixed; top: 0; left: 0; z-index: 1000; border-right: 1px solid var(--border); background-color: var(--surface); }
+    .main-wrapper { flex-grow: 1; margin-left: 260px; display: flex; flex-direction: column; min-height: 100vh; background-color: var(--background); }
   </style>
 </head>
 <body>
-  <div class="sidebar">
-    <div class="brand"><i class="bi bi-capsule"></i> Pharma Care</div>
-    <nav class="mt-2">
-      <a class="nav-link" href="/admin"><i class="bi bi-speedometer2"></i> Dashboard</a>
-      <a class="nav-link" href="/admin/medicine"><i class="bi bi-capsule"></i> Thuốc</a>
-      <a class="nav-link" href="/admin/medicine-type"><i class="bi bi-tags"></i> Loại thuốc</a>
-      <a class="nav-link" href="/admin/rack"><i class="bi bi-grid-3x3-gap"></i> Kệ thuốc</a>
-      <a class="nav-link" href="/admin/batch"><i class="bi bi-box-seam"></i> Lô hàng</a>
-      <a class="nav-link" href="/admin/supplier"><i class="bi bi-truck"></i> Nhà cung cấp</a>
-      <a class="nav-link" href="/admin/customer"><i class="bi bi-people"></i> Khách hàng</a>
-      <a class="nav-link" href="/admin/sales"><i class="bi bi-receipt"></i> Hóa đơn bán</a>
-      <% if (currentUser && currentUser.permission === 'admin') { %>
-      <a class="nav-link" href="/admin/staff"><i class="bi bi-person-badge"></i> Nhân viên</a>
-      <% } %>
-      <hr style="border-color: rgba(255,255,255,.15); margin: 8px 20px;">
-      <a class="nav-link" href="/logout"><i class="bi bi-box-arrow-left"></i> Đăng xuất</a>
-    </nav>
-  </div>
-  <div class="main-content">
-    <div class="topbar">
-      <h5 class="mb-0"><%= title %></h5>
-      <span class="text-muted"><i class="bi bi-person-circle"></i> <%= currentUser ? currentUser.name : '' %> (<%= currentUser ? currentUser.permission : '' %>)</span>
+  <div class="app-container">
+    <!-- Sidebar -->
+    <div class="sidebar-wrapper">
+      <div class="sidebar">
+        <div class="sidebar-header">
+          <a href="/admin" class="text-decoration-none brand-logo">
+            <i class="bi bi-capsule-pill"></i> Pharma Care
+          </a>
+        </div>
+        <nav class="d-flex flex-column gap-1">
+          <p class="text-xs text-muted text-uppercase fw-bold px-4 mb-2 mt-2" style="font-size: 0.75rem; letter-spacing: 0.05em;">Trang chủ</p>
+          <a class="nav-link" href="/admin"><i class="bi bi-grid-1x2"></i> Tổng quan</a>
+          
+          <p class="text-xs text-muted text-uppercase fw-bold px-4 mb-2 mt-3" style="font-size: 0.75rem; letter-spacing: 0.05em;">Quản lý kho</p>
+          <a class="nav-link" href="/admin/medicine"><i class="bi bi-capsule"></i> Thuốc</a>
+          <a class="nav-link" href="/admin/medicine-type"><i class="bi bi-tags"></i> Loại thuốc</a>
+          <a class="nav-link" href="/admin/rack"><i class="bi bi-inboxes"></i> Kệ thuốc</a>
+          <a class="nav-link" href="/admin/batch"><i class="bi bi-box-seam"></i> Lô hàng lẻ</a>
+          <a class="nav-link" href="/admin/purchase"><i class="bi bi-box-arrow-in-down"></i> Hóa đơn nhập</a>
+          <a class="nav-link" href="/admin/supplier"><i class="bi bi-truck"></i> Nhà cung cấp</a>
+          
+          <p class="text-xs text-muted text-uppercase fw-bold px-4 mb-2 mt-3" style="font-size: 0.75rem; letter-spacing: 0.05em;">Bán hàng</p>
+          <a class="nav-link" href="/admin/customer"><i class="bi bi-people"></i> Khách hàng</a>
+          <a class="nav-link" href="/admin/sales"><i class="bi bi-receipt"></i> Hóa đơn bán</a>
+          
+          <% if (currentUser && currentUser.permission === 'admin') { %>
+          <p class="text-xs text-muted text-uppercase fw-bold px-4 mb-2 mt-3" style="font-size: 0.75rem; letter-spacing: 0.05em;">Nhân sự</p>
+          <a class="nav-link" href="/admin/shift"><i class="bi bi-clock"></i> Ca làm việc</a>
+          <a class="nav-link" href="/admin/assignment"><i class="bi bi-calendar-check"></i> Phân công ca</a>
+          <a class="nav-link" href="/admin/staff"><i class="bi bi-person-vcard"></i> Nhân viên</a>
+          <% } %>
+        </nav>
+      </div>
     </div>
-    <%- body %>
+
+    <!-- Main Content -->
+    <div class="main-wrapper">
+      <!-- Navbar -->
+      <header class="top-navbar sticky-top d-flex justify-content-between align-items-center">
+        <h4 class="mb-0 fw-bold text-main" style="letter-spacing: -0.02em;"><%= title %></h4>
+        
+        <div class="d-flex align-items-center gap-3">
+          <div class="user-profile dropdown">
+            <div class="d-flex align-items-center gap-2 cursor-pointer" data-bs-toggle="dropdown" aria-expanded="false" style="cursor: pointer;">
+              <% if (currentUser && currentUser.images) { %>
+                <img src="<%= currentUser.images %>" class="user-avatar" alt="Avatar">
+              <% } else { %>
+                <div class="user-avatar"><%= currentUser ? currentUser.name.charAt(0).toUpperCase() : 'U' %></div>
+              <% } %>
+              <div class="d-none d-md-block">
+                <div class="fw-bold" style="font-size: 0.9rem; line-height: 1.2;"><%= currentUser ? currentUser.name : '' %></div>
+                <div class="text-muted" style="font-size: 0.75rem;"><%= currentUser ? (currentUser.permission === 'admin' ? 'Quản trị viên' : 'Nhân viên') : '' %></div>
+              </div>
+              <i class="bi bi-chevron-down text-muted ms-1 small"></i>
+            </div>
+            <ul class="dropdown-menu dropdown-menu-end shadow-sm border-0 mt-2 rounded-3">
+              <li><a class="dropdown-item py-2" href="/change-password"><i class="bi bi-shield-lock me-2 text-muted"></i> Đổi mật khẩu</a></li>
+              <li><hr class="dropdown-divider"></li>
+              <li><a class="dropdown-item py-2 text-danger" href="/logout"><i class="bi bi-box-arrow-right me-2"></i> Đăng xuất</a></li>
+            </ul>
+          </div>
+        </div>
+      </header>
+
+      <!-- Page Content -->
+      <main class="content-wrapper">
+        <%- body %>
+      </main>
+    </div>
   </div>
+
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+  <script>
+    // Add active class to current nav link
+    document.addEventListener("DOMContentLoaded", function() {
+      const currentPath = window.location.pathname;
+      const navLinks = document.querySelectorAll('.sidebar .nav-link');
+      navLinks.forEach(link => {
+        if (link.getAttribute('href') === currentPath || 
+           (currentPath.startsWith(link.getAttribute('href') + '/') && link.getAttribute('href') !== '/admin')) {
+          link.classList.add('active');
+        }
+      });
+    });
+  </script>
 </body>
 </html>
